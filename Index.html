@@ -1,57 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SVG Code Generator</title>
+<title>SVG → HTML Generator</title>
 <style>
-body { font-family: sans-serif; padding: 20px; }
-textarea { width: 100%; height: 200px; margin-top: 10px; }
+body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+textarea { width: 100%; height: 150px; margin-top: 10px; }
 button { margin-top: 10px; padding: 10px 20px; }
+#preview { border: 1px solid #ccc; padding: 10px; margin-top: 10px; white-space: pre-wrap; background: #f9f9f9; }
 </style>
 </head>
 <body>
 
-<h2>SVG to Code Generator</h2>
-<input type="file" id="svgInput" accept=".svg">
-<textarea id="output" placeholder="Generated code will appear here..."></textarea>
-<br>
-<button id="downloadBtn">Download Generated Code</button>
+<h2>SVG → HTML Generator (Web-Based)</h2>
+
+<label>Upload SVG:</label><br>
+<input type="file" id="svgInput" accept=".svg"><br><br>
+
+<label>Custom CSS (optional):</label><br>
+<textarea id="cssInput" placeholder="Add CSS for fonts, colors, etc."></textarea><br>
+
+<button id="generateBtn">Generate HTML</button>
+<button id="downloadBtn">Download HTML</button>
+
+<h3>Preview:</h3>
+<div id="preview"></div>
 
 <script>
-document.getElementById('svgInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+let generatedHTML = "";
+
+document.getElementById('generateBtn').addEventListener('click', function() {
+    const file = document.getElementById('svgInput').files[0];
+    const customCSS = document.getElementById('cssInput').value;
+    if (!file) { alert("Please upload an SVG file."); return; }
 
     const reader = new FileReader();
     reader.onload = function(event) {
         const svgText = event.target.result;
-        const filename = file.name.toLowerCase();
-        let output = "";
 
-        if (filename.includes("button")) {
-            output += "<button class='svg-button'>Click me!</button>\n";
-            output += "<style>.svg-button{padding:10px 20px; background:#ccc; border:none; cursor:pointer;}</style>";
-        } else if (filename.includes("icon")) {
-            output += "<div class='svg-icon'>\n" + svgText + "\n</div>";
-            output += "<style>.svg-icon svg{width:50px;height:50px;}</style>";
-        } else if (filename.includes("animation") || filename.includes("anim")) {
-            output += "<div class='svg-animation'>\n" + svgText + "\n</div>";
-            output += "<style>.svg-animation svg{width:100px;height:100px; animation:rotate 2s linear infinite;}@keyframes rotate{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>";
-        } else {
-            output += svgText;
-        }
+        // Simple HTML template
+        generatedHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generated Page</title>
+<style>
+${customCSS}
+</style>
+</head>
+<body>
+${svgText}
+</body>
+</html>`;
 
-        document.getElementById('output').value = output;
+        document.getElementById('preview').innerText = generatedHTML;
     };
     reader.readAsText(file);
 });
 
+// Download functionality
 document.getElementById('downloadBtn').addEventListener('click', function() {
-    const blob = new Blob([document.getElementById('output').value], {type: "text/html"});
+    if (!generatedHTML) { alert("Generate HTML first."); return; }
+    const blob = new Blob([generatedHTML], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = "generated_code.html";
+    a.download = "generated_page.html";
     a.click();
     URL.revokeObjectURL(url);
 });
