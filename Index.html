@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SVG Code Generator</title>
+<style>
+body { font-family: sans-serif; padding: 20px; }
+textarea { width: 100%; height: 200px; margin-top: 10px; }
+button { margin-top: 10px; padding: 10px 20px; }
+</style>
+</head>
+<body>
+
+<h2>SVG to Code Generator</h2>
+<input type="file" id="svgInput" accept=".svg">
+<textarea id="output" placeholder="Generated code will appear here..."></textarea>
+<br>
+<button id="downloadBtn">Download Generated Code</button>
+
+<script>
+document.getElementById('svgInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const svgText = event.target.result;
+        const filename = file.name.toLowerCase();
+        let output = "";
+
+        if (filename.includes("button")) {
+            output += "<button class='svg-button'>Click me!</button>\n";
+            output += "<style>.svg-button{padding:10px 20px; background:#ccc; border:none; cursor:pointer;}</style>";
+        } else if (filename.includes("icon")) {
+            output += "<div class='svg-icon'>\n" + svgText + "\n</div>";
+            output += "<style>.svg-icon svg{width:50px;height:50px;}</style>";
+        } else if (filename.includes("animation") || filename.includes("anim")) {
+            output += "<div class='svg-animation'>\n" + svgText + "\n</div>";
+            output += "<style>.svg-animation svg{width:100px;height:100px; animation:rotate 2s linear infinite;}@keyframes rotate{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>";
+        } else {
+            output += svgText;
+        }
+
+        document.getElementById('output').value = output;
+    };
+    reader.readAsText(file);
+});
+
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    const blob = new Blob([document.getElementById('output').value], {type: "text/html"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "generated_code.html";
+    a.click();
+    URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
