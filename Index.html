@@ -2,73 +2,164 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SVG → HTML Generator</title>
+<title>SVG → Web Page Generator</title>
 <style>
-body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
 textarea { width: 100%; height: 150px; margin-top: 10px; }
-button { margin-top: 10px; padding: 10px 20px; }
-#preview { border: 1px solid #ccc; padding: 10px; margin-top: 10px; white-space: pre-wrap; background: #f9f9f9; }
+#preview { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background:#f9f9f9; white-space: pre-wrap; }
+label { display:block; margin-top:10px; }
 </style>
 </head>
 <body>
 
-<h2>SVG → HTML Generator (Web-Based)</h2>
+<h2>SVG → Full Web Page Generator</h2>
 
-<label>Upload SVG:</label><br>
-<input type="file" id="svgInput" accept=".svg"><br><br>
+<label>Upload SVG(s):</label>
+<input type="file" id="svgInput" accept=".svg" multiple>
 
-<label>Custom CSS (optional):</label><br>
-<textarea id="cssInput" placeholder="Add CSS for fonts, colors, etc."></textarea><br>
+<label>Custom CSS (optional):</label>
+<textarea id="cssInput" placeholder="Enter your CSS here..."></textarea>
+
+<label>Features:</label>
+<input type="checkbox" id="embedFiles" checked> Embed CSS/JS in HTML<br>
+<input type="checkbox" id="darkMode"> Enable Dark Mode<br>
+<input type="checkbox" id="langSwitch"> Enable Language Switch<br>
+<input type="checkbox" id="simpleAnim"> Add Simple Animations<br>
 
 <button id="generateBtn">Generate HTML</button>
-<button id="downloadBtn">Download HTML</button>
+<button id="downloadBtn">Download</button>
 
 <h3>Preview:</h3>
 <div id="preview"></div>
 
 <script>
-let generatedHTML = "";
+let generatedHTML = "", generatedCSS = "", generatedJS = "";
 
 document.getElementById('generateBtn').addEventListener('click', function() {
-    const file = document.getElementById('svgInput').files[0];
+    const files = document.getElementById('svgInput').files;
     const customCSS = document.getElementById('cssInput').value;
-    if (!file) { alert("Please upload an SVG file."); return; }
+    const embed = document.getElementById('embedFiles').checked;
+    const darkMode = document.getElementById('darkMode').checked;
+    const langSwitch = document.getElementById('langSwitch').checked;
+    const simpleAnim = document.getElementById('simpleAnim').checked;
 
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const svgText = event.target.result;
+    if(files.length === 0){ alert("Please upload SVG(s)."); return; }
 
-        // Simple HTML template
-        generatedHTML = `
-<!DOCTYPE html>
+    let svgContent = "";
+    let readCount = 0;
+
+    // Read all SVG files
+    for(let i=0; i<files.length; i++){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            svgContent += e.target.result + "\n";
+            readCount++;
+            if(readCount === files.length){
+                buildPage();
+            }
+        };
+        reader.readAsText(files[i]);
+    }
+
+    function buildPage(){
+        // CSS generation
+        generatedCSS = customCSS + "\n";
+        if(darkMode){
+            generatedCSS += "body{background:#111;color:#eee;} \n";
+        }
+        if(simpleAnim){
+            generatedCSS += ".spin{animation:spin 2s linear infinite;}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}} \n";
+        }
+
+        // JS generation
+        generatedJS = "";
+        if(langSwitch){
+            generatedJS += `
+function switchLanguage(lang){ 
+    document.body.setAttribute('data-lang', lang); 
+} \n`;
+        }
+
+        // Build final HTML
+        if(embed){
+            generatedHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Generated Page</title>
 <style>
-${customCSS}
+${generatedCSS}
 </style>
 </head>
 <body>
-${svgText}
+${svgContent}
+<script>
+${generatedJS}
+</script>
+</body>
+</html>`;
+        } else {
+            // Separate files version
+            generatedHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generated Page</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+${svgContent}
+<script src="script.js"></script>
 </body>
 </html>`;
 
+            // separate CSS and JS content
+            // generatedCSS and generatedJS are already populated
+        }
+
         document.getElementById('preview').innerText = generatedHTML;
-    };
-    reader.readAsText(file);
+    }
 });
 
 // Download functionality
-document.getElementById('downloadBtn').addEventListener('click', function() {
-    if (!generatedHTML) { alert("Generate HTML first."); return; }
-    const blob = new Blob([generatedHTML], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "generated_page.html";
-    a.click();
-    URL.revokeObjectURL(url);
+document.getElementById('downloadBtn').addEventListener('click', function(){
+    if(!generatedHTML){ alert("Generate HTML first."); return; }
+
+    const embed = document.getElementById('embedFiles').checked;
+    if(embed){
+        const blob = new Blob([generatedHTML], {type:"text/html"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "generated_page.html";
+        a.click();
+        URL.revokeObjectURL(url);
+    } else {
+        // Download separate files
+        const blobHTML = new Blob([generatedHTML], {type:"text/html"});
+        const urlHTML = URL.createObjectURL(blobHTML);
+        const aHTML = document.createElement('a');
+        aHTML.href = urlHTML;
+        aHTML.download = "index.html";
+        aHTML.click();
+        URL.revokeObjectURL(urlHTML);
+
+        const blobCSS = new Blob([generatedCSS], {type:"text/css"});
+        const urlCSS = URL.createObjectURL(blobCSS);
+        const aCSS = document.createElement('a');
+        aCSS.href = urlCSS;
+        aCSS.download = "style.css";
+        aCSS.click();
+        URL.revokeObjectURL(urlCSS);
+
+        const blobJS = new Blob([generatedJS], {type:"text/javascript"});
+        const urlJS = URL.createObjectURL(blobJS);
+        const aJS = document.createElement('a');
+        aJS.href = urlJS;
+        aJS.download = "script.js";
+        aJS.click();
+        URL.revokeObjectURL(urlJS);
+    }
 });
 </script>
 
