@@ -216,3 +216,5 @@ document.addEventListener("DOMContentLoaded", () => {
     semanticTag.value = suggestion;
   }
 });
+  } // end suggestTag
+}); // end DOMContentLoaded
