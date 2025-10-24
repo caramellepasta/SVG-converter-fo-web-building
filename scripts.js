@@ -132,6 +132,27 @@ applyTag.addEventListener("click", () => {
   selectedElement = null;
   tagSelector.style.display = "none";
 });
+// 🧪 Inject live preview
+const previewFrame = document.getElementById("live-preview");
+const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+const combinedHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    ${cssOutput.value}
+  </style>
+</head>
+<body>
+  ${codeOutput.value}
+</body>
+</html>
+`;
+
+previewDoc.open();
+previewDoc.write(combinedHTML);
+previewDoc.close();
 
 // 📁 Scan all <g> groups in SVG and list them like folders
 function scanGroups(svgRoot) {
