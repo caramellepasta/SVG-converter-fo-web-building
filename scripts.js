@@ -106,6 +106,6 @@ el.addEventListener("click", (e) => {
   if (selectedElement) selectedElement.classList.remove("selected");
   selectedElement = el;
   el.classList.add("selected");
-  tagSelector.style.display = "block";
+ tagSelector.style.display = "block";
   suggestTag(el);
 });
