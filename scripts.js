@@ -68,11 +68,22 @@ if (!fontFamily && selectedElement.hasAttribute("style")) {
   if (match) fontFamily = match[1];
 }
 // 🧩 Prepare Google Fonts link if applicable
-let fontLink = "";
-if (fontFamily) {
-  const googleFont = fontFamily.replace(/\s+/g, "+");
-  fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
+let fontFamily = selectedElement.getAttribute("font-family");
+
+if (!fontFamily && selectedElement.hasAttribute("style")) {
+  const style = selectedElement.getAttribute("style");
+
+  // Match font-family directly
+  const matchFamily = style.match(/font-family:\s*['"]?([^;"']+)/);
+  if (matchFamily) fontFamily = matchFamily[1];
+
+  // Match shorthand font declaration
+  if (!fontFamily) {
+    const matchFont = style.match(/font:\s*[^;]*\s([^;"']+)/);
+    if (matchFont) fontFamily = matchFont[1];
+  }
 }
+
     // 🎨 Extract fill color
     let fill = selectedElement.getAttribute("fill");
     if (!fill && selectedElement.hasAttribute("style")) {
