@@ -7,6 +7,8 @@ const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
 const useSvgSource = document.getElementById("use-svg-source");
 const cssOutput = document.getElementById("css-output"); // 🧵 CSS output box
+const backgroundToggle = document.getElementById("background-toggle");
+const fullWidthToggle = document.getElementById("full-width-toggle");
 
 // 🖱️ Track which SVG element is currently selected
 let selectedElement = null;
@@ -54,19 +56,25 @@ applyTag.addEventListener("click", () => {
 
   const tag = semanticTag.value;
   const id = selectedElement.id || "svg-part";
-  const className = id.replace(/\s+/g, "_"); // 🧼 Clean spaces for class name
+  const className = id.replace(/\s+/g, "_");
 
   // 🔹 Generate HTML
   const html = `<${tag} class="${className}"></${tag}>`;
 
-  // 🔹 Extract visual info for CSS
+  // 🔹 Extract visual info
   const fill = selectedElement.getAttribute("fill") || "#ccc";
   const bbox = selectedElement.getBBox?.();
-  const width = bbox?.width?.toFixed(2) || "100%";
-  const height = bbox?.height?.toFixed(2) || "auto";
+  const width = fullWidthToggle.checked ? "100vw" : `${bbox?.width?.toFixed(2) || "100%"}`;
+  const height = `${bbox?.height?.toFixed(2) || "auto"}`;
 
   // 🔹 Generate CSS
-  let css = `.${className} {\n  background: ${fill};\n  width: ${width}px;\n  height: ${height}px;\n}\n`;
+  let css = `.${className} {\n  background: ${fill};\n  width: ${width};\n  height: ${height};`;
+
+  if (backgroundToggle.checked) {
+    css += `\n  position: absolute;\n  z-index: -1;`;
+  }
+
+  css += `\n}\n`;
 
   // 🔹 Output to textareas
   codeOutput.value += html + "\n\n";
@@ -77,7 +85,6 @@ applyTag.addEventListener("click", () => {
   selectedElement = null;
   tagSelector.style.display = "none";
 });
-
 // 📁 Scan all <g> groups in SVG and list them like folders
 function scanGroups(svgRoot) {
   const groups = svgRoot.querySelectorAll("g");
