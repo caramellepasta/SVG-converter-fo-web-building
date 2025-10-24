@@ -102,9 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     }
-    if (fill === "black" || fill === "#000" || fill === "#000000") {
-      fill = "#ccc";
-    }
+const isBlack = /^(black|#000000|#000|rgb\(0,\s*0,\s*0\))$/i;
+if (fill && isBlack.test(fill)) {
+  fill = "#ccc"; // or any default you prefer
+}
 
     // 📐 Extract size
     const bbox = selectedElement.getBBox?.();
