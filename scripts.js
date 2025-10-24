@@ -1,5 +1,3 @@
-console.log("Script loaded!");
-
 document.addEventListener("DOMContentLoaded", () => {
   // 🌟 Grab references to key elements
   const svgContainer = document.getElementById("svg-preview");
@@ -11,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cssOutput = document.getElementById("css-output");
   const previewFrame = document.getElementById("live-preview");
 
-  // ✅ Background controls
   const bgEnabled = document.getElementById("background-enabled");
   const bgFullscreen = document.getElementById("background-fullscreen");
   const bgRepeat = document.getElementById("background-repeat");
@@ -37,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsText(e.target.files[0]);
   });
 
-  // 🖱️ Enable click-to-select on SVG elements
+  // 🖱️ Enable click-to-select
   function enableSelection(container) {
     const elements = container.querySelectorAll("*");
     elements.forEach(el => {
@@ -122,4 +119,62 @@ document.addEventListener("DOMContentLoaded", () => {
 <body>${codeOutput.value}</body>
 </html>`;
     previewDoc.open();
-    previewDoc
+    previewDoc.write(combinedHTML);
+    previewDoc.close();
+
+    selectedElement.classList.remove("selected");
+    selectedElement = null;
+    tagSelector.style.display = "none";
+  });
+
+  // 📁 List SVG groups
+  function scanGroups(svgRoot) {
+    const groups = svgRoot.querySelectorAll("g");
+    const groupList = document.createElement("ul");
+    groupList.innerHTML = "<h3>SVG Groups</h3>";
+
+    groups.forEach((group, i) => {
+      const label = group.id || group.classList[0] || `Group ${i + 1}`;
+      const item = document.createElement("li");
+      item.textContent = label;
+      item.style.cursor = "pointer";
+
+      item.onclick = () => {
+        if (selectedElement) selectedElement.classList.remove("selected");
+        selectedElement = group;
+        group.classList.add("selected");
+        tagSelector.style.display = "block";
+        suggestTag(group);
+      };
+
+      groupList.appendChild(item);
+    });
+
+    document.body.appendChild(groupList);
+  }
+
+  // 🧠 Suggest semantic tag
+  function suggestTag(el) {
+    const id = el.id?.toLowerCase() || "";
+    const bbox = el.getBBox?.();
+    const fill = el.getAttribute("fill");
+    const width = bbox?.width || 0;
+    const height = bbox?.height || 0;
+
+    let suggestion = "section";
+    if (id.includes("nav")) suggestion = "nav";
+    else if (id.includes("footer")) suggestion = "footer";
+    else if (id.includes("header")) suggestion = "header";
+    else if (id.includes("hero")) suggestion = "section";
+    else if (id.includes("button")) suggestion = "button";
+    else if (el.tagName === "text") suggestion = "h1";
+
+    if (!id && fill === "red" && height < 60 && width > 300) {
+      suggestion = "nav";
+    } else if (!id && height > 100 && width > 300) {
+      suggestion = "header";
+    }
+
+    semanticTag.value = suggestion;
+  }
+});
