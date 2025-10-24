@@ -19,11 +19,17 @@ fileInput.addEventListener("change", (e) => {
 
   // 🧠 When the file is loaded, inject SVG and activate selection + group scanning
   reader.onload = () => {
-    svgContainer.innerHTML = reader.result;
-    const svgRoot = svgContainer.querySelector("svg");
-    enableSelection(svgRoot);   // 🔍 Allow clicking on SVG elements
-    scanGroups(svgRoot);        // 📁 List all <g> groups as folders
-  };
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(reader.result, "image/svg+xml");
+  const svgRoot = svgDoc.querySelector("svg");
+
+  // Clear previous preview
+  svgContainer.innerHTML = "";
+  svgContainer.appendChild(svgRoot);
+
+  enableSelection(svgRoot);
+  scanGroups(svgRoot);
+};
 
   reader.readAsText(e.target.files[0]); // 📖 Read SVG file as text
 });
