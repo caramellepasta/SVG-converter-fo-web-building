@@ -132,8 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
     cssOutput.value += css + "\n";
 
     // 🌐 Inject live preview
-    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-    const combinedHTML = `
+ const safeHTML = codeOutput.value.replace(/<\/script>/gi, "<\\/script>");
+const safeCSS = cssOutput.value.replace(/<\/style>/gi, "<\\/style>");
+
+const combinedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,24 +145,16 @@ document.addEventListener("DOMContentLoaded", () => {
   ${fontLink}
   <style>
     body {
-      font-family: ${fontFamily || "sans-serif"};
+      font-family: ${fontFamily ? fontFamily.replace(/["']/g, "") : "sans-serif"};
     }
-    ${cssOutput.value}
+    ${safeCSS}
   </style>
 </head>
 <body>
-  ${codeOutput.value}
+  ${safeHTML}
 </body>
-</html>`;
-    previewDoc.open();
-    previewDoc.write(combinedHTML);
-    previewDoc.close();
-
-    selectedElement.classList.remove("selected");
-    selectedElement = null;
-    tagSelector.style.display = "none";
-  });
-
+</html>
+`;
   // 📁 List SVG groups
   function scanGroups(svgRoot) {
     const groups = svgRoot.querySelectorAll("g");
