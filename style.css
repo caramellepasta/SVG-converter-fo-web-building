@@ -3,9 +3,12 @@ body {
   padding: 20px;
   background: #f9f9f9;
 }
-#svg-preview svg {
-  border: 1px solid #ccc;
-  margin-top: 10px;
+#svg-preview {
+  position: relative;
+  overflow: visible;
+  min-height: 400px; /* or whatever height you want as a base */
+  border: 1px dashed #aaa;
+  margin-bottom: 1rem;
 }
 .selected {
   stroke: red !important;
