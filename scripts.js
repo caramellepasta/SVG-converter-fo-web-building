@@ -6,6 +6,7 @@ const semanticTag = document.getElementById("semantic-tag");
 const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
 const useSvgSource = document.getElementById("use-svg-source");
+const cssOutput = document.getElementById("css-output"); // 🧵 CSS output box
 
 // 🖱️ Track which SVG element is currently selected
 let selectedElement = null;
@@ -53,20 +54,26 @@ applyTag.addEventListener("click", () => {
 
   const tag = semanticTag.value;
   const id = selectedElement.id || "svg-part";
+  const className = id.replace(/\s+/g, "_"); // 🧼 Clean spaces for class name
 
-  let html = "";
+  let html = `<${tag} class="${className}"></${tag}>`;
 
-  // 🖼️ Option 1: Use original SVG as image source
-  if (useSvgSource.checked) {
-    html = `<${tag}>\n  <img src="${id}.svg" alt="${tag} element">\n</${tag}>`;
-  } 
-  // 🎨 Option 2: Rebuild layout using CSS from SVG shape
-  else {
-    const fill = selectedElement.getAttribute("fill") || "#ccc";
-    const bbox = selectedElement.getBBox?.();
-    html = `<${tag} style="background:${fill}; width:${bbox?.width}px; height:${bbox?.height}px;"></${tag}>`;
-  }
+  const fill = selectedElement.getAttribute("fill") || "#ccc";
+  const bbox = selectedElement.getBBox?.();
+  const width = bbox?.width?.toFixed(2) || "100%";
+  const height = bbox?.height?.toFixed(2) || "auto";
 
+  let css = `.${className} {\n  background: ${fill};\n  width: ${width}px;\n  height: ${height}px;\n}\n`;
+
+  // 📝 Add generated HTML and CSS to output boxes
+  codeOutput.value += html + "\n\n";
+  cssOutput.value += css + "\n";
+
+  // 🔄 Reset selection
+  selectedElement.classList.remove("selected");
+  selectedElement = null;
+  tagSelector.style.display = "none";
+});
   // 📝 Add generated HTML to output box
   codeOutput.value += html + "\n\n";
 
