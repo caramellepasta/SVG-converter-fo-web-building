@@ -4,6 +4,7 @@ const tagSelector = document.getElementById("tag-selector");
 const semanticTag = document.getElementById("semantic-tag");
 const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
+const useSvgSource = document.getElementById("use-svg-source");
 
 let selectedElement = null;
 
@@ -11,7 +12,9 @@ fileInput.addEventListener("change", (e) => {
   const reader = new FileReader();
   reader.onload = () => {
     svgContainer.innerHTML = reader.result;
-    enableSelection(svgContainer);
+    const svgRoot = svgContainer.querySelector("svg");
+    enableSelection(svgRoot);
+    scanGroups(svgRoot);
   };
   reader.readAsText(e.target.files[0]);
 });
@@ -25,18 +28,18 @@ function enableSelection(container) {
       selectedElement = el;
       el.classList.add("selected");
       tagSelector.style.display = "block";
+      suggestTag(el);
     });
   });
 }
 
-// Application Logic
 applyTag.addEventListener("click", () => {
   if (!selectedElement) return;
   const tag = semanticTag.value;
   const id = selectedElement.id || "svg-part";
 
   let html = "";
-  if (document.getElementById("use-svg-source").checked) {
+  if (useSvgSource.checked) {
     html = `<${tag}>\n  <img src="${id}.svg" alt="${tag} element">\n</${tag}>`;
   } else {
     const fill = selectedElement.getAttribute("fill") || "#ccc";
@@ -49,7 +52,7 @@ applyTag.addEventListener("click", () => {
   selectedElement = null;
   tagSelector.style.display = "none";
 });
-// SVG Group Scanning
+
 function scanGroups(svgRoot) {
   const groups = svgRoot.querySelectorAll("g");
   const groupList = document.createElement("ul");
@@ -65,6 +68,7 @@ function scanGroups(svgRoot) {
       selectedElement = group;
       group.classList.add("selected");
       tagSelector.style.display = "block";
+      suggestTag(group);
     };
     groupList.appendChild(item);
   });
@@ -72,22 +76,13 @@ function scanGroups(svgRoot) {
   document.body.appendChild(groupList);
 }
 
-// After Loading the SVG
-reader.onload = () => {
-  svgContainer.innerHTML = reader.result;
-  const svgRoot = svgContainer.querySelector("svg");
-  enableSelection(svgRoot);
-  scanGroups(svgRoot);
-};
-// Tag Suggestion 
 function suggestTag(el) {
-  const tagOptions = ["section", "nav", "header", "footer", "button"];
   const bbox = el.getBBox?.();
   const fill = el.getAttribute("fill");
   const width = bbox?.width || 0;
   const height = bbox?.height || 0;
 
-  let suggestion = "section"; // default
+  let suggestion = "section";
 
   if (fill === "red" && height < 60 && width > 300) {
     suggestion = "nav";
@@ -99,13 +94,3 @@ function suggestTag(el) {
 
   semanticTag.value = suggestion;
 }
-
-// When Element is Selected
-el.addEventListener("click", (e) => {
-  e.stopPropagation();
-  if (selectedElement) selectedElement.classList.remove("selected");
-  selectedElement = el;
-  el.classList.add("selected");
- tagSelector.style.display = "block";
-  suggestTag(el);
-});
