@@ -103,8 +103,9 @@ if (!fontFamily && selectedElement.hasAttribute("style")) {
         }
       }
     }
-    fill = fill || "#ccc";
-
+if (fill === "black" || fill === "#000" || fill === "#000000") {
+  fill = "#ccc"; // or any default you prefer
+}
     // 📐 Extract size
     const bbox = selectedElement.getBBox?.();
     const width = `${bbox?.width?.toFixed(2) || "100%"}`;
