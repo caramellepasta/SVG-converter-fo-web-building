@@ -59,15 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // 📝 Extract inner text content from SVG element
 const innerText = selectedElement.textContent?.trim() || "";
 const html = `<${tag} class="${className}">${innerText}</${tag}>`;
-    // 🔤 Detect font-family from SVG element
-let fontFamily = selectedElement.getAttribute("font-family");
-
-if (!fontFamily && selectedElement.hasAttribute("style")) {
-  const style = selectedElement.getAttribute("style");
-  const match = style.match(/font-family:\s*['"]?([^;"']+)/);
-  if (match) fontFamily = match[1];
-}
-// 🧩 Prepare Google Fonts link if applicable
+// 🔤 Detect font-family from SVG element
 let fontFamily = selectedElement.getAttribute("font-family");
 
 if (!fontFamily && selectedElement.hasAttribute("style")) {
@@ -83,6 +75,13 @@ if (!fontFamily && selectedElement.hasAttribute("style")) {
     if (matchFont) fontFamily = matchFont[1];
   }
 }
+
+// 🧩 Prepare Google Fonts link if applicable
+let fontLink = "";
+if (fontFamily) {
+  const googleFont = fontFamily.replace(/\s+/g, "+");
+  fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
+}}
 
     // 🎨 Extract fill color
     let fill = selectedElement.getAttribute("fill");
