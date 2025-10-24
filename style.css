@@ -1,31 +1,31 @@
-/* 🌐 Base styles */
+/* 🌐 Base styles for page layout */
 body {
-  font-family: sans-serif;
+  font-family: sans-serif; /* Default font for fallback */
   margin: 0;
   padding: 1rem;
-  background: #f9f9f9;
+  background: #f9f9f9; /* Soft neutral background */
 }
 
-/* 🧩 Layout container */
+/* 🧩 Main layout container: Mapper + Preview side-by-side */
 .container {
   display: flex;
-  gap: 2rem;
+  gap: 2rem; /* Space between panels */
   align-items: flex-start;
 }
 
-/* 🧱 Mapper panel styles */
+/* 🧱 Mapper panel: Upload, tag selector, options, output */
 .mapper-panel {
   flex: 1;
   min-width: 400px;
 }
 
-/* 🌐 Preview panel styles */
+/* 🌐 Preview panel: Live iframe preview */
 .preview-panel {
   flex: 1;
   min-width: 400px;
 }
 
-/* 🖼️ Iframe preview */
+/* 🖼️ Iframe preview styling */
 iframe {
   width: 100%;
   height: 500px;
@@ -33,32 +33,49 @@ iframe {
   background: white;
 }
 
-/* 📝 Textareas */
+/* 📝 Textarea styling for HTML/CSS output */
 textarea {
   width: 100%;
   box-sizing: border-box;
+  font-family: monospace; /* Easier to read code */
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  resize: vertical;
 }
 
-/* ⚙️ Fieldset styling */
+/* ⚙️ Fieldset styling for options panel */
 fieldset {
   margin-top: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
 }
 
-/* 🔍 SVG preview box */
+/* 🔍 SVG preview container */
 #svg-preview {
   border: 1px dashed #aaa;
   padding: 1rem;
   margin-top: 1rem;
   background: #fff;
+  min-height: 200px;
 }
+
 /* 🔴 Highlight selected SVG element */
 .selected {
   outline: 2px solid red;
   outline-offset: 2px;
 }
+
 /* 📁 Group list styling */
 ul {
   padding-left: 1rem;
+  list-style-type: disc;
+  margin-top: 1rem;
+}
+
+li {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
 }
 
 li:hover {
