@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- 🌐 Meta setup for responsive layout -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SVG to HTML Mapper</title>
 
-  <!-- 🎨 External CSS -->
+  <!-- 🎨 External stylesheet for layout and styling -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- 🧠 Tool Title -->
   <h1>SVG to HTML Mapper (WIP)</h1>
 
-  <!-- 🧩 Main layout container -->
+  <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
   <div class="container">
-    <!-- 🧱 Mapper Panel -->
+    
+    <!-- 🧱 Mapper Panel: Upload, Tagging, Options, Output -->
     <div class="mapper-panel">
-      <!-- 📂 Upload SVG -->
+      
+      <!-- 📂 Upload SVG file -->
       <input type="file" id="svg-upload" accept=".svg" />
 
-      <!-- 🔍 SVG Preview -->
+      <!-- 🔍 SVG Preview Area -->
       <div id="svg-preview"></div>
 
-      <!-- 🏷️ Semantic Tag Selector -->
+      <!-- 🏷️ Semantic Tag Selector (shown after element click) -->
       <div id="tag-selector" style="display:none;">
         <label for="semantic-tag">Choose a semantic HTML tag:</label>
         <select id="semantic-tag">
-          <!-- Semantic HTML5 tags -->
+          <!-- 🧠 Semantic HTML5 tags for accessibility and structure -->
           <option value="section">section</option>
           <option value="header">header</option>
           <option value="footer">footer</option>
@@ -54,32 +58,34 @@
       <!-- ⚙️ Background + Source Options -->
       <fieldset>
         <legend>Options</legend>
+        <!-- 🖼️ Use original SVG as background source -->
         <label><input type="checkbox" id="use-svg-source" checked /> Use original SVG as source</label><br />
+        <!-- 🎨 Background styling toggles -->
         <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
         <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
         <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
         <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
       </fieldset>
 
-      <!-- 🧾 HTML Output -->
+      <!-- 🧾 HTML Output Panel -->
       <h2>Generated HTML</h2>
       <textarea id="code-output" rows="8"></textarea>
       <button onclick="navigator.clipboard.writeText(document.getElementById('code-output').value)">Copy Code</button>
 
-      <!-- 🎨 CSS Output -->
+      <!-- 🎨 CSS Output Panel -->
       <h2>Generated CSS</h2>
       <textarea id="css-output" rows="8"></textarea>
       <button onclick="navigator.clipboard.writeText(document.getElementById('css-output').value)">Copy CSS</button>
     </div>
 
-    <!-- 🌐 Live Preview Panel -->
+    <!-- 🌐 Live Preview Panel: Shows full HTML page output -->
     <div class="preview-panel">
       <h2>Live Preview</h2>
       <iframe id="live-preview"></iframe>
     </div>
   </div>
 
-  <!-- 🧠 Script -->
+  <!-- 🧠 Script logic for SVG parsing, tagging, and preview -->
   <script src="scripts.js"></script>
 </body>
 </html>
