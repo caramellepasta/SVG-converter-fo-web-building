@@ -56,26 +56,21 @@ applyTag.addEventListener("click", () => {
   const id = selectedElement.id || "svg-part";
   const className = id.replace(/\s+/g, "_"); // 🧼 Clean spaces for class name
 
-  let html = `<${tag} class="${className}"></${tag}>`;
+  // 🔹 Generate HTML
+  const html = `<${tag} class="${className}"></${tag}>`;
 
+  // 🔹 Extract visual info for CSS
   const fill = selectedElement.getAttribute("fill") || "#ccc";
   const bbox = selectedElement.getBBox?.();
   const width = bbox?.width?.toFixed(2) || "100%";
   const height = bbox?.height?.toFixed(2) || "auto";
 
+  // 🔹 Generate CSS
   let css = `.${className} {\n  background: ${fill};\n  width: ${width}px;\n  height: ${height}px;\n}\n`;
 
-  // 📝 Add generated HTML and CSS to output boxes
+  // 🔹 Output to textareas
   codeOutput.value += html + "\n\n";
   cssOutput.value += css + "\n";
-
-  // 🔄 Reset selection
-  selectedElement.classList.remove("selected");
-  selectedElement = null;
-  tagSelector.style.display = "none";
-});
-  // 📝 Add generated HTML to output box
-  codeOutput.value += html + "\n\n";
 
   // 🔄 Reset selection
   selectedElement.classList.remove("selected");
