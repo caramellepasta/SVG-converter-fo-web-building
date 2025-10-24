@@ -6,6 +6,7 @@ const semanticTag = document.getElementById("semantic-tag");
 const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
 const cssOutput = document.getElementById("css-output");
+const previewFrame = document.getElementById("live-preview");
 
 // ✅ Background controls
 const bgEnabled = document.getElementById("background-enabled");
@@ -104,7 +105,6 @@ applyTag.addEventListener("click", () => {
 
   if (bgEnabled.checked) {
     css += `\n  background-color: ${fill};`;
-
     css += `\n  background-repeat: ${bgRepeat.checked ? "repeat" : "no-repeat"};`;
 
     if (bgFullscreen.checked) {
@@ -127,16 +127,9 @@ applyTag.addEventListener("click", () => {
   codeOutput.value += html + "\n\n";
   cssOutput.value += css + "\n";
 
-  // 🔄 Reset selection
-  selectedElement.classList.remove("selected");
-  selectedElement = null;
-  tagSelector.style.display = "none";
-});
-// 🧪 Inject live preview
-const previewFrame = document.getElementById("live-preview");
-const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-
-const combinedHTML = `
+  // 🧪 Inject live preview
+  const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+  const combinedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,11 +141,16 @@ const combinedHTML = `
   ${codeOutput.value}
 </body>
 </html>
-`;
+  `;
+  previewDoc.open();
+  previewDoc.write(combinedHTML);
+  previewDoc.close();
 
-previewDoc.open();
-previewDoc.write(combinedHTML);
-previewDoc.close();
+  // 🔄 Reset selection
+  selectedElement.classList.remove("selected");
+  selectedElement = null;
+  tagSelector.style.display = "none";
+});
 
 // 📁 Scan all <g> groups in SVG and list them like folders
 function scanGroups(svgRoot) {
