@@ -69,27 +69,27 @@ if (!fill && selectedElement.hasAttribute("style")) {
   if (match) fill = match[1];
 }
 
-// If still no fill, check children
+// If still no fill, scan all children for a valid fill
 if (!fill && selectedElement.children?.length > 0) {
   for (let child of selectedElement.children) {
-    fill = child.getAttribute("fill");
+    let childFill = child.getAttribute("fill");
 
     // Check child's style too
-    if (!fill && child.hasAttribute("style")) {
+    if (!childFill && child.hasAttribute("style")) {
       const style = child.getAttribute("style");
       const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
-      if (match) {
-        fill = match[1];
-        break;
-      }
+      if (match) childFill = match[1];
     }
 
-    if (fill) break;
+    // Skip "none" or empty fills
+    if (childFill && childFill !== "none") {
+      fill = childFill;
+      break;
+    }
   }
 }
 
 fill = fill || "#ccc"; // Final fallback
-
   // 🔹 Extract size
   const bbox = selectedElement.getBBox?.();
   const width = fullWidthToggle.checked ? "100vw" : `${bbox?.width?.toFixed(2) || "100%"}`;
