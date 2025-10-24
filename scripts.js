@@ -132,10 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
     cssOutput.value += css + "\n";
 
     // 🌐 Inject live preview
- const safeHTML = codeOutput.value.replace(/<\/script>/gi, "<\\/script>");
-const safeCSS = cssOutput.value.replace(/<\/style>/gi, "<\\/style>");
+    const safeHTML = codeOutput.value.replace(/<\/script>/gi, "<\\/script>");
+    const safeCSS = cssOutput.value.replace(/<\/style>/gi, "<\\/style>");
 
-const combinedHTML = `
+    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+    const combinedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -155,6 +156,15 @@ const combinedHTML = `
 </body>
 </html>
 `;
+    previewDoc.open();
+    previewDoc.write(combinedHTML);
+    previewDoc.close();
+
+    selectedElement.classList.remove("selected");
+    selectedElement = null;
+    tagSelector.style.display = "none";
+  });
+
   // 📁 List SVG groups
   function scanGroups(svgRoot) {
     const groups = svgRoot.querySelectorAll("g");
