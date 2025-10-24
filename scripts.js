@@ -29,11 +29,21 @@ function enableSelection(container) {
   });
 }
 
+// Application Logic
 applyTag.addEventListener("click", () => {
   if (!selectedElement) return;
   const tag = semanticTag.value;
   const id = selectedElement.id || "svg-part";
-  const html = `<${tag}>\n  <img src="${id}.svg" alt="${tag} element">\n</${tag}>`;
+
+  let html = "";
+  if (document.getElementById("use-svg-source").checked) {
+    html = `<${tag}>\n  <img src="${id}.svg" alt="${tag} element">\n</${tag}>`;
+  } else {
+    const fill = selectedElement.getAttribute("fill") || "#ccc";
+    const bbox = selectedElement.getBBox?.();
+    html = `<${tag} style="background:${fill}; width:${bbox?.width}px; height:${bbox?.height}px;"></${tag}>`;
+  }
+
   codeOutput.value += html + "\n\n";
   selectedElement.classList.remove("selected");
   selectedElement = null;
