@@ -59,15 +59,36 @@ applyTag.addEventListener("click", () => {
   // 🔹 Generate HTML
   const html = `<${tag} class="${className}"></${tag}>`;
 
-  // 🔹 Extract fill color
-  let fill = selectedElement.getAttribute("fill");
-  if (!fill && selectedElement.children?.length > 0) {
-    for (let child of selectedElement.children) {
-      fill = child.getAttribute("fill");
-      if (fill) break;
+// 🔹 Extract fill color
+let fill = selectedElement.getAttribute("fill");
+
+// If no fill, check inline style
+if (!fill && selectedElement.hasAttribute("style")) {
+  const style = selectedElement.getAttribute("style");
+  const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
+  if (match) fill = match[1];
+}
+
+// If still no fill, check children
+if (!fill && selectedElement.children?.length > 0) {
+  for (let child of selectedElement.children) {
+    fill = child.getAttribute("fill");
+
+    // Check child's style too
+    if (!fill && child.hasAttribute("style")) {
+      const style = child.getAttribute("style");
+      const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
+      if (match) {
+        fill = match[1];
+        break;
+      }
     }
+
+    if (fill) break;
   }
-  fill = fill || "#ccc";
+}
+
+fill = fill || "#ccc"; // Final fallback
 
   // 🔹 Extract size
   const bbox = selectedElement.getBBox?.();
