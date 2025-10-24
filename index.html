@@ -45,16 +45,35 @@
     <button id="apply-tag">Generate HTML</button>
   </div>
 
-  <!-- ⚙️ Toggles -->
+<!-- ⚙️ Source + Background Options -->
+<fieldset>
+  <legend>Options</legend>
+
   <label>
-    <input type="checkbox" id="background-toggle" />
-    Mark as background layer
-  </label>
-  <br />
+    <input type="checkbox" id="use-svg-source" checked />
+    Use original SVG as source
+  </label><br />
+
   <label>
-    <input type="checkbox" id="full-width-toggle" />
-    Stretch width to full screen
+    <input type="checkbox" id="background-enabled" />
+    Enable background styling
+  </label><br />
+
+  <label>
+    <input type="checkbox" id="background-fullscreen" />
+    Full screen (force 100vw x 100vh)
+  </label><br />
+
+  <label>
+    <input type="checkbox" id="background-repeat" />
+    Repeat background
+  </label><br />
+
+  <label>
+    <input type="checkbox" id="background-absolute" />
+    Position absolute
   </label>
+</fieldset>
 
   <!-- 🧱 Generated HTML Output -->
   <h2>Generated HTML</h2>
