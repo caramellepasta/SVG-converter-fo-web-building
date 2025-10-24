@@ -1,21 +1,62 @@
+/* 🌐 Base styles */
 body {
   font-family: sans-serif;
-  padding: 20px;
+  margin: 0;
+  padding: 1rem;
   background: #f9f9f9;
 }
-#svg-preview {
-  position: relative;
-  overflow: visible;
-  min-height: 400px; /* or whatever height you want as a base */
-  border: 1px dashed #aaa;
-  margin-bottom: 1rem;
+
+/* 🧩 Layout container */
+.container {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
 }
-.selected {
-  stroke: red !important;
-  stroke-width: 2 !important;
-  cursor: pointer;
+
+/* 🧱 Mapper panel styles */
+.mapper-panel {
+  flex: 1;
+  min-width: 400px;
 }
+
+/* 🌐 Preview panel styles */
+.preview-panel {
+  flex: 1;
+  min-width: 400px;
+}
+
+/* 🖼️ Iframe preview */
+iframe {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+/* 📝 Textareas */
 textarea {
   width: 100%;
-  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+/* ⚙️ Fieldset styling */
+fieldset {
+  margin-top: 1rem;
+}
+
+/* 🔍 SVG preview box */
+#svg-preview {
+  border: 1px dashed #aaa;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: #fff;
+}
+
+/* 📁 Group list styling */
+ul {
+  padding-left: 1rem;
+}
+
+li:hover {
+  background: #eee;
 }
