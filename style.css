@@ -1,0 +1,18 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f9f9f9;
+}
+#svg-preview svg {
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+.selected {
+  stroke: red !important;
+  stroke-width: 2 !important;
+  cursor: pointer;
+}
+textarea {
+  width: 100%;
+  margin-top: 10px;
+}
