@@ -6,8 +6,15 @@ const semanticTag = document.getElementById("semantic-tag");
 const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
 const cssOutput = document.getElementById("css-output");
-const backgroundToggle = document.getElementById("background-toggle");
-const fullWidthToggle = document.getElementById("full-width-toggle");
+
+// ✅ Background controls
+const bgEnabled = document.getElementById("background-enabled");
+const bgFullscreen = document.getElementById("background-fullscreen");
+const bgRepeat = document.getElementById("background-repeat");
+const bgAbsolute = document.getElementById("background-absolute");
+
+// ✅ SVG source toggle (future logic)
+const useSvgSource = document.getElementById("use-svg-source");
 
 let selectedElement = null;
 
@@ -59,47 +66,61 @@ applyTag.addEventListener("click", () => {
   // 🔹 Generate HTML
   const html = `<${tag} class="${className}"></${tag}>`;
 
-// 🔹 Extract fill color
-let fill = selectedElement.getAttribute("fill");
+  // 🔹 Extract fill color
+  let fill = selectedElement.getAttribute("fill");
 
-// If no fill, check inline style
-if (!fill && selectedElement.hasAttribute("style")) {
-  const style = selectedElement.getAttribute("style");
-  const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
-  if (match) fill = match[1];
-}
+  if (!fill && selectedElement.hasAttribute("style")) {
+    const style = selectedElement.getAttribute("style");
+    const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
+    if (match) fill = match[1];
+  }
 
-// If still no fill, scan all children for a valid fill
-if (!fill && selectedElement.children?.length > 0) {
-  for (let child of selectedElement.children) {
-    let childFill = child.getAttribute("fill");
+  if (!fill && selectedElement.children?.length > 0) {
+    for (let child of selectedElement.children) {
+      let childFill = child.getAttribute("fill");
 
-    // Check child's style too
-    if (!childFill && child.hasAttribute("style")) {
-      const style = child.getAttribute("style");
-      const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
-      if (match) childFill = match[1];
-    }
+      if (!childFill && child.hasAttribute("style")) {
+        const style = child.getAttribute("style");
+        const match = style.match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
+        if (match) childFill = match[1];
+      }
 
-    // Skip "none" or empty fills
-    if (childFill && childFill !== "none") {
-      fill = childFill;
-      break;
+      if (childFill && childFill !== "none") {
+        fill = childFill;
+        break;
+      }
     }
   }
-}
 
-fill = fill || "#ccc"; // Final fallback
+  fill = fill || "#ccc";
+
   // 🔹 Extract size
   const bbox = selectedElement.getBBox?.();
-  const width = fullWidthToggle.checked ? "100vw" : `${bbox?.width?.toFixed(2) || "100%"}`;
+  const width = `${bbox?.width?.toFixed(2) || "100%"}`;
   const height = `${bbox?.height?.toFixed(2) || "auto"}`;
 
   // 🔹 Generate CSS
-  let css = `.${className} {\n  background: ${fill};\n  width: ${width};\n  height: ${height};`;
-  if (backgroundToggle.checked) {
-    css += `\n  position: absolute;\n  z-index: -1;`;
+  let css = `.${className} {`;
+
+  if (bgEnabled.checked) {
+    css += `\n  background-color: ${fill};`;
+
+    css += `\n  background-repeat: ${bgRepeat.checked ? "repeat" : "no-repeat"};`;
+
+    if (bgFullscreen.checked) {
+      css += `\n  width: 100vw;\n  height: 100vh;`;
+    } else {
+      css += `\n  width: ${width};\n  height: ${height};`;
+    }
+
+    if (bgAbsolute.checked) {
+      css += `\n  position: absolute;\n  z-index: -1;`;
+    }
+  } else {
+    css += `\n  background: ${fill};`;
+    css += `\n  width: ${width};\n  height: ${height};`;
   }
+
   css += `\n}\n`;
 
   // 🔹 Output to textareas
