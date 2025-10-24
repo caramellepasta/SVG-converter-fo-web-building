@@ -5,33 +5,29 @@ const tagSelector = document.getElementById("tag-selector");
 const semanticTag = document.getElementById("semantic-tag");
 const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
-const useSvgSource = document.getElementById("use-svg-source");
-const cssOutput = document.getElementById("css-output"); // 🧵 CSS output box
+const cssOutput = document.getElementById("css-output");
 const backgroundToggle = document.getElementById("background-toggle");
 const fullWidthToggle = document.getElementById("full-width-toggle");
 
-// 🖱️ Track which SVG element is currently selected
 let selectedElement = null;
 
 // 📂 Handle SVG file upload and preview
 fileInput.addEventListener("change", (e) => {
   const reader = new FileReader();
 
-  // 🧠 When the file is loaded, inject SVG and activate selection + group scanning
   reader.onload = () => {
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(reader.result, "image/svg+xml");
-  const svgRoot = svgDoc.querySelector("svg");
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(reader.result, "image/svg+xml");
+    const svgRoot = svgDoc.querySelector("svg");
 
-  // Clear previous preview
-  svgContainer.innerHTML = "";
-  svgContainer.appendChild(svgRoot);
+    svgContainer.innerHTML = "";
+    svgContainer.appendChild(svgRoot);
 
-  enableSelection(svgRoot);
-  scanGroups(svgRoot);
-};
+    enableSelection(svgRoot);
+    scanGroups(svgRoot);
+  };
 
-  reader.readAsText(e.target.files[0]); // 📖 Read SVG file as text
+  reader.readAsText(e.target.files[0]);
 });
 
 // 🖱️ Enable click-to-select on all SVG elements
@@ -40,23 +36,19 @@ function enableSelection(container) {
 
   elements.forEach(el => {
     el.addEventListener("click", (e) => {
-      e.stopPropagation(); // 🚫 Prevent bubbling to parent elements
-
-      // 🔄 Remove previous selection
+      e.stopPropagation();
       if (selectedElement) selectedElement.classList.remove("selected");
 
-      // ✅ Mark new selection
       selectedElement = el;
       el.classList.add("selected");
 
-      // 🧠 Show tag selector and suggest semantic tag
       tagSelector.style.display = "block";
       suggestTag(el);
     });
   });
 }
 
-// 🧱 Apply selected tag and generate HTML output
+// 🧱 Apply selected tag and generate HTML + CSS
 applyTag.addEventListener("click", () => {
   if (!selectedElement) return;
 
@@ -67,19 +59,26 @@ applyTag.addEventListener("click", () => {
   // 🔹 Generate HTML
   const html = `<${tag} class="${className}"></${tag}>`;
 
-  // 🔹 Extract visual info
-  const fill = selectedElement.getAttribute("fill") || "#ccc";
+  // 🔹 Extract fill color
+  let fill = selectedElement.getAttribute("fill");
+  if (!fill && selectedElement.children?.length > 0) {
+    for (let child of selectedElement.children) {
+      fill = child.getAttribute("fill");
+      if (fill) break;
+    }
+  }
+  fill = fill || "#ccc";
+
+  // 🔹 Extract size
   const bbox = selectedElement.getBBox?.();
   const width = fullWidthToggle.checked ? "100vw" : `${bbox?.width?.toFixed(2) || "100%"}`;
   const height = `${bbox?.height?.toFixed(2) || "auto"}`;
 
   // 🔹 Generate CSS
   let css = `.${className} {\n  background: ${fill};\n  width: ${width};\n  height: ${height};`;
-
   if (backgroundToggle.checked) {
     css += `\n  position: absolute;\n  z-index: -1;`;
   }
-
   css += `\n}\n`;
 
   // 🔹 Output to textareas
@@ -91,6 +90,7 @@ applyTag.addEventListener("click", () => {
   selectedElement = null;
   tagSelector.style.display = "none";
 });
+
 // 📁 Scan all <g> groups in SVG and list them like folders
 function scanGroups(svgRoot) {
   const groups = svgRoot.querySelectorAll("g");
@@ -103,7 +103,6 @@ function scanGroups(svgRoot) {
     item.textContent = label;
     item.style.cursor = "pointer";
 
-    // 🖱️ Clicking a group selects it and shows tag options
     item.onclick = () => {
       if (selectedElement) selectedElement.classList.remove("selected");
       selectedElement = group;
@@ -115,28 +114,31 @@ function scanGroups(svgRoot) {
     groupList.appendChild(item);
   });
 
-  // 📌 Add group list to the page
   document.body.appendChild(groupList);
 }
 
 // 🧠 Suggest semantic HTML tag based on shape, size, and color
 function suggestTag(el) {
+  const id = el.id?.toLowerCase() || "";
   const bbox = el.getBBox?.();
   const fill = el.getAttribute("fill");
   const width = bbox?.width || 0;
   const height = bbox?.height || 0;
 
-  let suggestion = "section"; // Default fallback
+  let suggestion = "section";
 
-  // 🔍 Heuristic rules for guessing tag
-  if (fill === "red" && height < 60 && width > 300) {
+  if (id.includes("nav")) suggestion = "nav";
+  else if (id.includes("footer")) suggestion = "footer";
+  else if (id.includes("header")) suggestion = "header";
+  else if (id.includes("hero")) suggestion = "section";
+  else if (id.includes("button")) suggestion = "button";
+  else if (el.tagName === "text") suggestion = "h1";
+
+  if (!id && fill === "red" && height < 60 && width > 300) {
     suggestion = "nav";
-  } else if (height > 100 && width > 300) {
+  } else if (!id && height > 100 && width > 300) {
     suggestion = "header";
-  } else if (el.tagName === "text") {
-    suggestion = "h1";
   }
 
-  // 📝 Pre-fill the dropdown with the suggestion
   semanticTag.value = suggestion;
 }
