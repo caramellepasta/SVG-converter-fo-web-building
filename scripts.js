@@ -1,3 +1,4 @@
+// 🌟 Grab references to key HTML elements
 const svgContainer = document.getElementById("svg-preview");
 const fileInput = document.getElementById("svg-upload");
 const tagSelector = document.getElementById("tag-selector");
@@ -6,53 +7,76 @@ const applyTag = document.getElementById("apply-tag");
 const codeOutput = document.getElementById("code-output");
 const useSvgSource = document.getElementById("use-svg-source");
 
+// 🖱️ Track which SVG element is currently selected
 let selectedElement = null;
 
+// 📂 Handle SVG file upload and preview
 fileInput.addEventListener("change", (e) => {
   const reader = new FileReader();
+
+  // 🧠 When the file is loaded, inject SVG and activate selection + group scanning
   reader.onload = () => {
     svgContainer.innerHTML = reader.result;
     const svgRoot = svgContainer.querySelector("svg");
-    enableSelection(svgRoot);
-    scanGroups(svgRoot);
+    enableSelection(svgRoot);   // 🔍 Allow clicking on SVG elements
+    scanGroups(svgRoot);        // 📁 List all <g> groups as folders
   };
-  reader.readAsText(e.target.files[0]);
+
+  reader.readAsText(e.target.files[0]); // 📖 Read SVG file as text
 });
 
+// 🖱️ Enable click-to-select on all SVG elements
 function enableSelection(container) {
   const elements = container.querySelectorAll("*");
+
   elements.forEach(el => {
     el.addEventListener("click", (e) => {
-      e.stopPropagation();
+      e.stopPropagation(); // 🚫 Prevent bubbling to parent elements
+
+      // 🔄 Remove previous selection
       if (selectedElement) selectedElement.classList.remove("selected");
+
+      // ✅ Mark new selection
       selectedElement = el;
       el.classList.add("selected");
+
+      // 🧠 Show tag selector and suggest semantic tag
       tagSelector.style.display = "block";
       suggestTag(el);
     });
   });
 }
 
+// 🧱 Apply selected tag and generate HTML output
 applyTag.addEventListener("click", () => {
   if (!selectedElement) return;
+
   const tag = semanticTag.value;
   const id = selectedElement.id || "svg-part";
 
   let html = "";
+
+  // 🖼️ Option 1: Use original SVG as image source
   if (useSvgSource.checked) {
     html = `<${tag}>\n  <img src="${id}.svg" alt="${tag} element">\n</${tag}>`;
-  } else {
+  } 
+  // 🎨 Option 2: Rebuild layout using CSS from SVG shape
+  else {
     const fill = selectedElement.getAttribute("fill") || "#ccc";
     const bbox = selectedElement.getBBox?.();
     html = `<${tag} style="background:${fill}; width:${bbox?.width}px; height:${bbox?.height}px;"></${tag}>`;
   }
 
+  // 📝 Add generated HTML to output box
   codeOutput.value += html + "\n\n";
+
+  // 🔄 Reset selection
   selectedElement.classList.remove("selected");
   selectedElement = null;
   tagSelector.style.display = "none";
 });
 
+// 📁 Scan all <g> groups in SVG and list them like folders
 function scanGroups(svgRoot) {
   const groups = svgRoot.querySelectorAll("g");
   const groupList = document.createElement("ul");
@@ -63,6 +87,8 @@ function scanGroups(svgRoot) {
     const item = document.createElement("li");
     item.textContent = label;
     item.style.cursor = "pointer";
+
+    // 🖱️ Clicking a group selects it and shows tag options
     item.onclick = () => {
       if (selectedElement) selectedElement.classList.remove("selected");
       selectedElement = group;
@@ -70,20 +96,24 @@ function scanGroups(svgRoot) {
       tagSelector.style.display = "block";
       suggestTag(group);
     };
+
     groupList.appendChild(item);
   });
 
+  // 📌 Add group list to the page
   document.body.appendChild(groupList);
 }
 
+// 🧠 Suggest semantic HTML tag based on shape, size, and color
 function suggestTag(el) {
   const bbox = el.getBBox?.();
   const fill = el.getAttribute("fill");
   const width = bbox?.width || 0;
   const height = bbox?.height || 0;
 
-  let suggestion = "section";
+  let suggestion = "section"; // Default fallback
 
+  // 🔍 Heuristic rules for guessing tag
   if (fill === "red" && height < 60 && width > 300) {
     suggestion = "nav";
   } else if (height > 100 && width > 300) {
@@ -92,5 +122,6 @@ function suggestTag(el) {
     suggestion = "h1";
   }
 
+  // 📝 Pre-fill the dropdown with the suggestion
   semanticTag.value = suggestion;
 }
