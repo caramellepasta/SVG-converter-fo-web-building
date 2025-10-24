@@ -11,17 +11,17 @@
 
   <input type="file" id="svg-upload" accept=".svg" />
   <div id="svg-preview"></div>
-
-  <div id="tag-selector" style="display:none;">
-    <label for="semantic-tag">Tag this element as:</label>
-    <select id="semantic-tag">
-      <option value="nav">Navigation</option>
-      <option value="button">Button</option>
-      <option value="header">Header</option>
-      <option value="section">Section</option>
-    </select>
-    <button id="apply-tag">Apply Tag</button>
-  </div>
+<!-- Tag Selector -->
+<div id="tag-selector" style="display:none;">
+  <label for="semantic-tag">Tag this element as:</label>
+  <select id="semantic-tag">
+    <option value="nav">Navigation</option>
+    <option value="button">Button</option>
+    <option value="header">Header</option>
+    <option value="section">Section</option>
+  </select>
+  <button id="apply-tag">Generate HTML</button>
+</div>
   <!-- Adding a label -->
 <label>
   <input type="checkbox" id="use-svg-source" checked />
