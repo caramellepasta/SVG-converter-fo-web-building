@@ -56,32 +56,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const tag = semanticTag.value;
     const id = selectedElement.id || "svg-part";
     const className = id.replace(/\s+/g, "_");
-// 📝 Extract inner text content from SVG element
-const innerText = selectedElement.textContent?.trim() || "";
-const html = `<${tag} class="${className}">${innerText}</${tag}>`;
-// 🔤 Detect font-family from SVG element
-let fontFamily = selectedElement.getAttribute("font-family");
 
-if (!fontFamily && selectedElement.hasAttribute("style")) {
-  const style = selectedElement.getAttribute("style");
+    // 📝 Extract inner text content
+    const innerText = selectedElement.textContent?.trim() || "";
+    const html = `<${tag} class="${className}">${innerText}</${tag}>`;
 
-  // Match font-family directly
-  const matchFamily = style.match(/font-family:\s*['"]?([^;"']+)/);
-  if (matchFamily) fontFamily = matchFamily[1];
+    // 🔤 Detect font-family
+    let fontFamily = selectedElement.getAttribute("font-family");
+    if (!fontFamily && selectedElement.hasAttribute("style")) {
+      const style = selectedElement.getAttribute("style");
 
-  // Match shorthand font declaration
-  if (!fontFamily) {
-    const matchFont = style.match(/font:\s*[^;]*\s([^;"']+)/);
-    if (matchFont) fontFamily = matchFont[1];
-  }
-}
+      const matchFamily = style.match(/font-family:\s*['"]?([^;"']+)/);
+      if (matchFamily) fontFamily = matchFamily[1];
 
-// 🧩 Prepare Google Fonts link if applicable
-let fontLink = "";
-if (fontFamily) {
-  const googleFont = fontFamily.replace(/\s+/g, "+");
-  fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
-}}
+      if (!fontFamily) {
+        const matchFont = style.match(/font:\s*[^;]*\s([^;"']+)/);
+        if (matchFont) fontFamily = matchFont[1];
+      }
+    }
+
+    // 🧩 Prepare Google Fonts link
+    let fontLink = "";
+    if (fontFamily) {
+      const googleFont = fontFamily.replace(/\s+/g, "+");
+      fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
+    }
 
     // 🎨 Extract fill color
     let fill = selectedElement.getAttribute("fill");
@@ -102,9 +101,10 @@ if (fontFamily) {
         }
       }
     }
-if (fill === "black" || fill === "#000" || fill === "#000000") {
-  fill = "#ccc"; // or any default you prefer
-}
+    if (fill === "black" || fill === "#000" || fill === "#000000") {
+      fill = "#ccc";
+    }
+
     // 📐 Extract size
     const bbox = selectedElement.getBBox?.();
     const width = `${bbox?.width?.toFixed(2) || "100%"}`;
@@ -133,7 +133,7 @@ if (fill === "black" || fill === "#000" || fill === "#000000") {
 
     // 🌐 Inject live preview
     const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-const combinedHTML = `
+    const combinedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
