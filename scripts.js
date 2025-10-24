@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   // 🌟 Grab references to key elements
+  console.log("scripts.js loaded successfully!");
   const svgContainer = document.getElementById("svg-preview");
   const fileInput = document.getElementById("svg-upload");
   const tagSelector = document.getElementById("tag-selector");
