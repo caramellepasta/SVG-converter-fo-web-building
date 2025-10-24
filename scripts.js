@@ -1,3 +1,5 @@
+console.log("Script loaded!");
+
 document.addEventListener("DOMContentLoaded", () => {
   // 🌟 Grab references to key elements
   const svgContainer = document.getElementById("svg-preview");
