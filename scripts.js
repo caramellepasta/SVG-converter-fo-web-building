@@ -56,8 +56,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const tag = semanticTag.value;
     const id = selectedElement.id || "svg-part";
     const className = id.replace(/\s+/g, "_");
-    const html = `<${tag} class="${className}"></${tag}>`;
+// 📝 Extract inner text content from SVG element
+const innerText = selectedElement.textContent?.trim() || "";
+const html = `<${tag} class="${className}">${innerText}</${tag}>`;
+    // 🔤 Detect font-family from SVG element
+let fontFamily = selectedElement.getAttribute("font-family");
 
+if (!fontFamily && selectedElement.hasAttribute("style")) {
+  const style = selectedElement.getAttribute("style");
+  const match = style.match(/font-family:\s*['"]?([^;"']+)/);
+  if (match) fontFamily = match[1];
+}
+// 🧩 Prepare Google Fonts link if applicable
+let fontLink = "";
+if (fontFamily) {
+  const googleFont = fontFamily.replace(/\s+/g, "+");
+  fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
+}
     // 🎨 Extract fill color
     let fill = selectedElement.getAttribute("fill");
     if (!fill && selectedElement.hasAttribute("style")) {
@@ -107,16 +122,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🌐 Inject live preview
     const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-    const combinedHTML = `
+const combinedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Preview</title>
-  <style>${cssOutput.value}</style>
+  ${fontLink}
+  <style>
+    body {
+      font-family: ${fontFamily || "sans-serif"};
+    }
+    ${cssOutput.value}
+  </style>
 </head>
-<body>${codeOutput.value}</body>
+<body>
+  ${codeOutput.value}
+</body>
 </html>`;
     previewDoc.open();
     previewDoc.write(combinedHTML);
