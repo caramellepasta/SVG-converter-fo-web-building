@@ -120,3 +120,8 @@ g.selected {
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }
+g.hovered {
+  stroke: blue;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
