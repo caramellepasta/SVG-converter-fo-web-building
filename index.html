@@ -13,7 +13,7 @@
   <!-- 🧠 Tool Title -->
   <h1>SVG to HTML Mapper (Progressive Builder)</h1>
 
-  <!-- 🌓 Mode selector: keep separate mappings for each mode -->
+  <!-- 🌓 Mode selector -->
   <div class="toolbar">
     <label for="mode-select"><strong>Mode:</strong></label>
     <select id="mode-select">
@@ -25,7 +25,7 @@
   <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
   <div class="container">
     
-    <!-- 🧱 Mapper Panel -->
+    <!-- 🧱 Mapper Panel (left) -->
     <div class="mapper-panel">
       <!-- 📂 Upload SVG -->
       <label for="svg-upload"><strong>Upload SVG:</strong></label>
@@ -38,7 +38,6 @@
       <div id="tag-selector" style="display:none;">
         <label for="semantic-tag">Choose a semantic HTML tag:</label>
         <select id="semantic-tag">
-          <!-- 🧠 Semantic HTML5 tags -->
           <option value="section">section</option>
           <option value="header">header</option>
           <option value="footer">footer</option>
@@ -64,7 +63,7 @@
         <button id="apply-tag">Map element</button>
       </div>
 
-      <!-- ⚙️ Options (kept simple for the progressive builder) -->
+      <!-- ⚙️ Options -->
       <fieldset>
         <legend>Options</legend>
         <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
@@ -73,22 +72,31 @@
         <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
       </fieldset>
 
-      <!-- 📁 SVG group list (for quick selection) -->
+      <!-- 📁 SVG group list -->
       <div id="group-list-container"></div>
-<!-- 🌐 Live Preview Panel -->
-<div class="preview-panel">
-  <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
-  <iframe id="live-preview"></iframe>
+    </div>
 
-  <!-- 🧾 Generated HTML + CSS right under the preview -->
-  <h2>Generated HTML (Current mode)</h2>
-  <textarea id="code-output" rows="10"></textarea>
-  <button id="copy-html">Copy HTML</button>
+    <!-- 🌐 Live Preview Panel (right) -->
+    <div class="preview-panel">
+      <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
+      <iframe id="live-preview"></iframe>
 
-  <h2>Generated CSS (Current mode)</h2>
-  <textarea id="css-output" rows="10"></textarea>
-  <button id="copy-css">Copy CSS</button>
-</div>
+      <!-- 🧾 Code Viewers stacked under preview -->
+      <div class="code-viewers">
+        <h2>Generated HTML (Current mode)</h2>
+        <textarea id="code-output" rows="10"></textarea>
+        <button id="copy-html">Copy HTML</button>
+
+        <h2>Generated CSS (Current mode)</h2>
+        <textarea id="css-output" rows="10"></textarea>
+        <button id="copy-css">Copy CSS</button>
+
+        <h2>Generated JS (Progressive Model)</h2>
+        <textarea id="js-output" rows="10" readonly></textarea>
+        <button id="copy-js">Copy JS</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 🧠 Script logic -->
   <script src="scripts.js"></script>
