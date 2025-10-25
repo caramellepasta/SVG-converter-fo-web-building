@@ -35,21 +35,25 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastCSS = "";
 
   // 📂 Load and preview SVG
-  fileInput.addEventListener("change", (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(reader.result, "image/svg+xml");
-      const svgRoot = svgDoc.querySelector("svg");
+fileInput.addEventListener("change", (e) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(reader.result, "image/svg+xml");
+    const svgRoot = svgDoc.querySelector("svg");
 
-      svgContainer.innerHTML = "";
-      svgContainer.appendChild(svgRoot);
+    svgContainer.innerHTML = "";
+    svgContainer.appendChild(svgRoot);
 
-      enableSelection(svgRoot);
-      scanGroups(svgRoot);
-    };
-    reader.readAsText(e.target.files[0]);
-  });
+    enableSelection(svgRoot);
+    scanGroups(svgRoot);
+
+    // ✅ FIX #1: Refresh outputs immediately after upload
+    // This clears the code viewer and preview so they’re in sync
+    regenerateOutputs();
+  };
+  reader.readAsText(e.target.files[0]);
+});
 
   // 🖱️ Enable click-to-select
   function enableSelection(container) {
@@ -180,54 +184,57 @@ document.addEventListener("DOMContentLoaded", () => {
     tagSelector.style.display = "none";
   });
 
-  // 🔁 Regenerate outputs
-  function regenerateOutputs() {
-    const model = mappings[currentMode];
-    let html = "";
-    let css = "";
-    const fontSet = new Set();
+ // 🔁 Regenerate outputs
+function regenerateOutputs() {
+  const model = mappings[currentMode];
+  let html = "";
+  let css = "";
+  const fontSet = new Set();
 
-    const structural = ["header", "footer", "nav", "section", "article", "aside"];
+  const structural = ["header", "footer", "nav", "section", "article", "aside"];
 
-    for (const [id, data] of Object.entries(model)) {
-      const content = structural.includes(data.tag)
-        ? `<p>${escapeHtml(data.text)}</p>`
-        : escapeHtml(data.text);
+  for (const [id, data] of Object.entries(model)) {
+    const content = structural.includes(data.tag)
+      ? `<p>${escapeHtml(data.text)}</p>`
+      : escapeHtml(data.text);
 
-      html += `<${data.tag} class="${data.className}">${content}</${data.tag}>\n`;
+    html += `<${data.tag} class="${data.className}">${content}</${data.tag}>\n`;
 
-      css += `.${data.className} {\n`;
-      if (data.font) {
-        css += `  font-family: '${data.font}', sans-serif;\n`;
-        fontSet.add(data.font);
-      }
-      if (data.fill) css += `  color: ${data.fill};\n`;
-      if (data.stroke) css += `  border: 1px solid ${data.stroke};\n`;
-      css += `  width: ${data.size.width};\n`;
-      css += `  height: ${data.size.height};\n`;
-
-      if (data.bg?.enabled) {
-        css += `  background-color: ${data.fill || "#f0f0f0"};\n`;
-        css += `  background-repeat: ${data.bg.repeat ? "repeat" : "no-repeat"};\n`;
-        if (data.bg.fullscreen) {
-          css += `  width: 100vw;\n  height: 100vh;\n`;
-        }
-        if (data.bg.absolute) {
-          css += `  position: absolute;\n  z-index: -1;\n`;
-        }
-      }
-      css += `}\n\n`;
+    css += `.${data.className} {\n`;
+    if (data.font) {
+      css += `  font-family: '${data.font}', sans-serif;\n`;
+      fontSet.add(data.font);
     }
+    if (data.fill) css += `  color: ${data.fill};\n`;
+    if (data.stroke) css += `  border: 1px solid ${data.stroke};\n`;
+    css += `  width: ${data.size.width};\n`;
+    css += `  height: ${data.size.height};\n`;
 
-    lastHTML = html.trim();
-    lastCSS = css.trim();
-
-    // Default to HTML view
-    codeOutput.value = lastHTML;
-
-    updatePreview(html, css, Array.from(fontSet));
+    if (data.bg?.enabled) {
+      css += `  background-color: ${data.fill || "#f0f0f0"};\n`;
+      css += `  background-repeat: ${data.bg.repeat ? "repeat" : "no-repeat"};\n`;
+      if (data.bg.fullscreen) {
+        css += `  width: 100vw;\n  height: 100vh;\n`;
+      }
+      if (data.bg.absolute) {
+        css += `  position: absolute;\n  z-index: -1;\n`;
+      }
+    }
+    css += `}\n\n`;
   }
 
+  lastHTML = html.trim();
+  lastCSS = css.trim();
+
+  // ✅ FIX #2: Enable/disable toggle buttons depending on content
+  showHTMLBtn.disabled = !lastHTML;
+  showCSSBtn.disabled = !lastCSS;
+
+  // Default to HTML view
+  codeOutput.value = lastHTML;
+
+  updatePreview(html, css, Array.from(fontSet));
+}
   // 🌐 Update live preview
   function updatePreview(html, css, fonts = []) {
     const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
