@@ -1,35 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- 🌐 Meta setup for responsive layout -->
+  <!-- 🌐 Meta and title -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SVG to HTML Mapper</title>
+  <title>SVG to HTML Mapper — Progressive Builder</title>
 
-  <!-- 🎨 External stylesheet for layout and styling -->
+  <!-- 🎨 External CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- 🧠 Tool Title -->
-  <h1>SVG to HTML Mapper (WIP)</h1>
+  <h1>SVG to HTML Mapper (Progressive Builder)</h1>
+
+  <!-- 🌓 Mode selector: keep separate mappings for each mode -->
+  <div class="toolbar">
+    <label for="mode-select"><strong>Mode:</strong></label>
+    <select id="mode-select">
+      <option value="light" selected>Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
 
   <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
   <div class="container">
     
-    <!-- 🧱 Mapper Panel: Upload, Tagging, Options, Output -->
+    <!-- 🧱 Mapper Panel -->
     <div class="mapper-panel">
-      
-      <!-- 📂 Upload SVG file -->
+      <!-- 📂 Upload SVG -->
+      <label for="svg-upload"><strong>Upload SVG:</strong></label>
       <input type="file" id="svg-upload" accept=".svg" />
 
-      <!-- 🔍 SVG Preview Area -->
+      <!-- 🔍 SVG Preview -->
       <div id="svg-preview"></div>
 
-      <!-- 🏷️ Semantic Tag Selector (shown after element click) -->
+      <!-- 🏷️ Semantic Tag Selector -->
       <div id="tag-selector" style="display:none;">
         <label for="semantic-tag">Choose a semantic HTML tag:</label>
         <select id="semantic-tag">
-          <!-- 🧠 Semantic HTML5 tags for accessibility and structure -->
+          <!-- 🧠 Semantic HTML5 tags -->
           <option value="section">section</option>
           <option value="header">header</option>
           <option value="footer">footer</option>
@@ -52,40 +61,40 @@
           <option value="li">li</option>
           <option value="blockquote">blockquote</option>
         </select>
-        <button id="apply-tag">Generate HTML</button>
+        <button id="apply-tag">Map element</button>
       </div>
 
-      <!-- ⚙️ Background + Source Options -->
+      <!-- ⚙️ Options (kept simple for the progressive builder) -->
       <fieldset>
         <legend>Options</legend>
-        <!-- 🖼️ Use original SVG as background source -->
-        <label><input type="checkbox" id="use-svg-source" checked /> Use original SVG as source</label><br />
-        <!-- 🎨 Background styling toggles -->
         <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
         <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
         <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
         <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
       </fieldset>
 
-      <!-- 🧾 HTML Output Panel -->
-      <h2>Generated HTML</h2>
-      <textarea id="code-output" rows="8"></textarea>
-      <button onclick="navigator.clipboard.writeText(document.getElementById('code-output').value)">Copy Code</button>
+      <!-- 📁 SVG group list (for quick selection) -->
+      <div id="group-list-container"></div>
 
-      <!-- 🎨 CSS Output Panel -->
-      <h2>Generated CSS</h2>
-      <textarea id="css-output" rows="8"></textarea>
-      <button onclick="navigator.clipboard.writeText(document.getElementById('css-output').value)">Copy CSS</button>
+      <!-- 🧾 HTML Output (current mode only) -->
+      <h2>Generated HTML (Current mode)</h2>
+      <textarea id="code-output" rows="10"></textarea>
+      <button id="copy-html">Copy HTML</button>
+
+      <!-- 🎨 CSS Output (current mode only) -->
+      <h2>Generated CSS (Current mode)</h2>
+      <textarea id="css-output" rows="10"></textarea>
+      <button id="copy-css">Copy CSS</button>
     </div>
 
-    <!-- 🌐 Live Preview Panel: Shows full HTML page output -->
+    <!-- 🌐 Live Preview Panel -->
     <div class="preview-panel">
-      <h2>Live Preview</h2>
+      <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
       <iframe id="live-preview"></iframe>
     </div>
   </div>
 
-  <!-- 🧠 Script logic for SVG parsing, tagging, and preview -->
+  <!-- 🧠 Script logic -->
   <script src="scripts.js"></script>
 </body>
 </html>
