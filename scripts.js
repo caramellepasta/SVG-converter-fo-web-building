@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Progressive Builder loaded");
-
+document.getElementById("js-output").value = JSON.stringify(mappings, null, 2);
   // 🌟 Grab references
   const svgContainer = document.getElementById("svg-preview");
   const fileInput = document.getElementById("svg-upload");
