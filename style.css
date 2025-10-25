@@ -51,11 +51,11 @@ fieldset {
   border: 1px solid #ccc;
 }
 
-/* 🔍 SVG preview box */
+/* 🔍 SVG preview takes remaining space */
 #svg-preview {
+  flex: 1;
   border: 1px dashed #aaa;
   padding: 1rem;
-  margin-top: 1rem;
   background: #fff;
   min-height: 200px;
 }
@@ -66,22 +66,22 @@ fieldset {
   outline-offset: 2px;
 }
 
-/* 📁 Group list styling */
-ul {
-  padding-left: 1rem;
-  list-style-type: disc;
+/* 🧩 Mapper columns: group list + SVG preview side by side */
+.mapper-columns {
+  display: flex;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
-li {
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
+/* 📁 Group list styling */
+#group-list-container {
+  flex: 0 0 200px; /* fixed width column */
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 0.5rem;
 }
-
-li:hover {
-  background: #eee;
-}
-
 /* 🧾 Code viewer styling */
 .code-viewer {
   margin-top: 1rem;
@@ -101,3 +101,4 @@ li:hover {
   background: #333;
   color: #fff;
 }
+
