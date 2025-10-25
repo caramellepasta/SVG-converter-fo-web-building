@@ -114,3 +114,9 @@ iframe {
   background: #333;
   color: #fff;
 }
+/* Highlight selected SVG groups */
+g.selected {
+  stroke: red;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
