@@ -81,19 +81,13 @@
       <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
       <iframe id="live-preview"></iframe>
 
-      <!-- 🧾 Code Viewers stacked under preview -->
-      <div class="code-viewers">
-        <h2>Generated HTML (Current mode)</h2>
-        <textarea id="code-output" rows="10"></textarea>
-        <button id="copy-html">Copy HTML</button>
-
-        <h2>Generated CSS (Current mode)</h2>
-        <textarea id="css-output" rows="10"></textarea>
-        <button id="copy-css">Copy CSS</button>
-
-        <h2>Generated JS (Progressive Model)</h2>
-        <textarea id="js-output" rows="10" readonly></textarea>
-        <button id="copy-js">Copy JS</button>
+      <!-- 🧾 Code Viewer under preview -->
+      <div class="code-viewer">
+        <div class="code-toolbar">
+          <button id="show-html" class="active">HTML</button>
+          <button id="show-css">CSS</button>
+        </div>
+        <textarea id="code-output" rows="12"></textarea>
       </div>
     </div>
   </div>
