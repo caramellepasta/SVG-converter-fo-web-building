@@ -1,31 +1,31 @@
-/* 🌐 Base styles for page layout */
+/* 🌐 Base styles */
 body {
-  font-family: sans-serif; /* Default font for fallback */
+  font-family: sans-serif;
   margin: 0;
   padding: 1rem;
-  background: #f9f9f9; /* Soft neutral background */
+  background: #f9f9f9;
 }
 
-/* 🧩 Main layout container: Mapper + Preview side-by-side */
+/* 🧩 Layout container */
 .container {
   display: flex;
-  gap: 2rem; /* Space between panels */
+  gap: 2rem;
   align-items: flex-start;
 }
 
-/* 🧱 Mapper panel: Upload, tag selector, options, output */
+/* 🧱 Mapper panel styles */
 .mapper-panel {
   flex: 1;
   min-width: 400px;
 }
 
-/* 🌐 Preview panel: Live iframe preview */
+/* 🌐 Preview panel styles */
 .preview-panel {
   flex: 1;
   min-width: 400px;
 }
 
-/* 🖼️ Iframe preview styling */
+/* 🖼️ Iframe preview */
 iframe {
   width: 100%;
   height: 500px;
@@ -33,25 +33,25 @@ iframe {
   background: white;
 }
 
-/* 📝 Textarea styling for HTML/CSS output */
+/* 📝 Textareas */
 textarea {
   width: 100%;
   box-sizing: border-box;
-  font-family: monospace; /* Easier to read code */
+  font-family: monospace;
   padding: 0.5rem;
   border: 1px solid #ccc;
   background: #fff;
   resize: vertical;
 }
 
-/* ⚙️ Fieldset styling for options panel */
+/* ⚙️ Fieldset styling */
 fieldset {
   margin-top: 1rem;
   padding: 0.5rem;
   border: 1px solid #ccc;
 }
 
-/* 🔍 SVG preview container */
+/* 🔍 SVG preview box */
 #svg-preview {
   border: 1px dashed #aaa;
   padding: 1rem;
@@ -80,4 +80,24 @@ li {
 
 li:hover {
   background: #eee;
+}
+
+/* 🧾 Code viewer styling */
+.code-viewer {
+  margin-top: 1rem;
+}
+
+.code-toolbar {
+  margin-bottom: 0.5rem;
+}
+
+.code-toolbar button {
+  margin-right: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+.code-toolbar button.active {
+  background: #333;
+  color: #fff;
 }
