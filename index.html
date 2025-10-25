@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- 🌐 Meta and title -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SVG to HTML Mapper — Progressive Builder</title>
-
-  <!-- 🎨 External CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -22,38 +18,30 @@
     </select>
   </div>
 
-  <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
+  <!-- 🧩 Main container: two columns -->
   <div class="container">
-    
-    <!-- 🧱 Mapper Panel (left) -->
+
+    <!-- 📂 Mapper Panel (left column) -->
     <div class="mapper-panel">
-      <!-- 📂 Upload SVG -->
+      <!-- Upload -->
       <label for="svg-upload"><strong>Upload SVG:</strong></label>
       <input type="file" id="svg-upload" accept=".svg" />
 
-      <!-- 🧩 Split into two columns: group list + SVG preview -->
-      <div class="mapper-columns">
-        
-        <!-- 📁 Group list + Options underneath -->
-        <div class="mapper-left">
-          <!-- Group list will be dynamically filled -->
-          <div id="group-list-container"></div>
+      <!-- Group list + Options stacked -->
+      <div id="group-list-container"></div>
 
-          <!-- ⚙️ Options box -->
-          <fieldset>
-            <legend>Options</legend>
-            <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
-            <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
-            <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
-            <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
-          </fieldset>
-        </div>
+      <fieldset>
+        <legend>Options</legend>
+        <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
+        <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
+        <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
+        <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
+      </fieldset>
 
-        <!-- 🔍 SVG Preview -->
-        <div id="svg-preview"></div>
-      </div>
+      <!-- SVG Preview -->
+      <div id="svg-preview"></div>
 
-      <!-- 🏷️ Semantic Tag Selector -->
+      <!-- Semantic Tag Selector -->
       <div id="tag-selector" style="display:none;">
         <label for="semantic-tag">Choose a semantic HTML tag:</label>
         <select id="semantic-tag">
@@ -83,12 +71,12 @@
       </div>
     </div>
 
-    <!-- 🌐 Live Preview Panel (right) -->
+    <!-- 🌐 Live Preview Panel (right column) -->
     <div class="preview-panel">
       <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
       <iframe id="live-preview"></iframe>
 
-      <!-- 🧾 Code Viewer under preview -->
+      <!-- Code Viewer -->
       <div class="code-viewer">
         <div class="code-toolbar">
           <button id="show-html" class="active">HTML</button>
@@ -99,7 +87,7 @@
     </div>
   </div>
 
-  <!-- 🧠 Script logic -->
+  <!-- Script -->
   <script src="scripts.js"></script>
 </body>
 </html>
