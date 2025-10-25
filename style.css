@@ -6,59 +6,42 @@ body {
   background: #f9f9f9;
 }
 
-/* 🧩 Layout container */
+/* 🧠 Title */
+h1 {
+  margin-bottom: 0.5rem;
+}
+
+/* Toolbar */
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+/* 🧩 Main container: two columns */
 .container {
   display: flex;
   gap: 2rem;
   align-items: flex-start;
 }
 
-/* 🧱 Mapper panel styles */
+/* 📂 Mapper panel (left) */
 .mapper-panel {
   flex: 1;
-  min-width: 400px;
-}
-
-/* 🌐 Preview panel styles */
-.preview-panel {
-  flex: 1;
-  min-width: 400px;
-}
-
-/* 🖼️ Iframe preview */
-iframe {
-  width: 100%;
-  height: 500px;
-  border: 1px solid #ccc;
-  background: white;
-}
-
-/* 🧩 Mapper columns: group list + SVG preview side by side */
-.mapper-columns {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-/* 📁 Group list + options column */
-.mapper-left {
-  flex: 0 0 220px; /* fixed width */
+  min-width: 350px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Group list styling */
+/* Group list */
 #group-list-container {
-  flex: 1;
-  max-height: 300px;
+  max-height: 250px;
   overflow-y: auto;
   border: 1px solid #ccc;
   background: #fff;
   padding: 0.5rem;
 }
 
-/* Nested group list (tree view) */
+/* Nested group list */
 #group-list-container ul {
   list-style-type: none;
   padding-left: 1rem;
@@ -73,29 +56,44 @@ iframe {
   background: #eee;
 }
 
-/* Options box styling */
-.mapper-left fieldset {
+/* Options box */
+.mapper-panel fieldset {
   border: 1px solid #ccc;
   padding: 0.5rem;
   background: #fafafa;
 }
 
-/* 🔍 SVG preview takes remaining space */
+/* SVG preview */
 #svg-preview {
   flex: 1;
   border: 1px dashed #aaa;
   padding: 1rem;
   background: #fff;
-  min-height: 200px;
+  min-height: 300px;
 }
 
-/* 🔴 Highlight selected SVG element */
-.selected {
-  outline: 2px solid red;
-  outline-offset: 2px;
+/* Highlight selected SVG groups */
+g.selected {
+  stroke: red;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
 }
 
-/* 🧾 Code viewer styling */
+/* 🌐 Preview panel (right) */
+.preview-panel {
+  flex: 1;
+  min-width: 400px;
+}
+
+/* Iframe preview */
+iframe {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+/* Code viewer */
 .code-viewer {
   margin-top: 1rem;
 }
@@ -113,15 +111,4 @@ iframe {
 .code-toolbar button.active {
   background: #333;
   color: #fff;
-}
-/* Highlight selected SVG groups */
-g.selected {
-  stroke: red;
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
-}
-g.hovered {
-  stroke: blue;
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
 }
