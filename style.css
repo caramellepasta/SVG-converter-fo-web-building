@@ -73,9 +73,17 @@ h1 {
 }
 
 /* Highlight selected SVG groups */
-g.selected {
-  stroke: red;
-  stroke-width: 2;
+/* Apply highlight to all child shapes of a selected group */
+g.selected * {
+  stroke: red !important;
+  stroke-width: 2 !important;
+  vector-effect: non-scaling-stroke;
+  fill-opacity: 0.9; /* optional: makes it pop */
+}
+/* Hover highlight for groups */
+g.hovered * {
+  stroke: blue !important;
+  stroke-width: 1.5 !important;
   vector-effect: non-scaling-stroke;
 }
 
