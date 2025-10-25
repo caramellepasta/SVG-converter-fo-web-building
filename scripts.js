@@ -307,4 +307,6 @@ ${html}
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
   }
+  li.addEventListener("mouseenter", () => group.classList.add("hovered"));
+li.addEventListener("mouseleave", () => group.classList.remove("hovered"));
 });
