@@ -25,31 +25,33 @@
   <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
   <div class="container">
     
-   <!-- 🧱 Mapper Panel (left) -->
-<div class="mapper-panel">
-  <!-- 📂 Upload SVG -->
-  <label for="svg-upload"><strong>Upload SVG:</strong></label>
-  <input type="file" id="svg-upload" accept=".svg" />
+    <!-- 🧱 Mapper Panel (left) -->
+    <div class="mapper-panel">
+      <!-- 📂 Upload SVG -->
+      <label for="svg-upload"><strong>Upload SVG:</strong></label>
+      <input type="file" id="svg-upload" accept=".svg" />
 
-  <!-- 🧩 Split into two columns: group list + SVG preview -->
-  <div class="mapper-columns">
-    <!-- 📁 SVG group list -->
-    <div id="group-list-container"></div>
+      <!-- 🧩 Split into two columns: group list + SVG preview -->
+      <div class="mapper-columns">
+        
+        <!-- 📁 Group list + Options underneath -->
+        <div class="mapper-left">
+          <!-- Group list will be dynamically filled -->
+          <div id="group-list-container"></div>
 
-    <!-- 🔍 SVG Preview -->
-    <div id="svg-preview"></div>
-  </div>
+          <!-- ⚙️ Options box -->
+          <fieldset>
+            <legend>Options</legend>
+            <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
+            <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
+            <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
+            <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
+          </fieldset>
+        </div>
 
-  <!-- 🏷️ Semantic Tag Selector -->
-  <div id="tag-selector" style="display:none;">
-    <!-- ... your tag selector dropdown ... -->
-  </div>
-
-  <!-- ⚙️ Options -->
-  <fieldset>
-    <!-- ... your background options ... -->
-  </fieldset>
-</div>
+        <!-- 🔍 SVG Preview -->
+        <div id="svg-preview"></div>
+      </div>
 
       <!-- 🏷️ Semantic Tag Selector -->
       <div id="tag-selector" style="display:none;">
@@ -79,18 +81,6 @@
         </select>
         <button id="apply-tag">Map element</button>
       </div>
-
-      <!-- ⚙️ Options -->
-      <fieldset>
-        <legend>Options</legend>
-        <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
-        <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
-        <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
-        <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
-      </fieldset>
-
-      <!-- 📁 SVG group list -->
-      <div id="group-list-container"></div>
     </div>
 
     <!-- 🌐 Live Preview Panel (right) -->
