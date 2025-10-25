@@ -309,4 +309,10 @@ ${html}
   }
   li.addEventListener("mouseenter", () => group.classList.add("hovered"));
 li.addEventListener("mouseleave", () => group.classList.remove("hovered"));
+  li.addEventListener("mouseenter", () => {
+  group.classList.add("hovered");
+});
+li.addEventListener("mouseleave", () => {
+  group.classList.remove("hovered");
+});
 });
