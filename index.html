@@ -75,24 +75,20 @@
 
       <!-- 📁 SVG group list (for quick selection) -->
       <div id="group-list-container"></div>
+<!-- 🌐 Live Preview Panel -->
+<div class="preview-panel">
+  <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
+  <iframe id="live-preview"></iframe>
 
-      <!-- 🧾 HTML Output (current mode only) -->
-      <h2>Generated HTML (Current mode)</h2>
-      <textarea id="code-output" rows="10"></textarea>
-      <button id="copy-html">Copy HTML</button>
+  <!-- 🧾 Generated HTML + CSS right under the preview -->
+  <h2>Generated HTML (Current mode)</h2>
+  <textarea id="code-output" rows="10"></textarea>
+  <button id="copy-html">Copy HTML</button>
 
-      <!-- 🎨 CSS Output (current mode only) -->
-      <h2>Generated CSS (Current mode)</h2>
-      <textarea id="css-output" rows="10"></textarea>
-      <button id="copy-css">Copy CSS</button>
-    </div>
-
-    <!-- 🌐 Live Preview Panel -->
-    <div class="preview-panel">
-      <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
-      <iframe id="live-preview"></iframe>
-    </div>
-  </div>
+  <h2>Generated CSS (Current mode)</h2>
+  <textarea id="css-output" rows="10"></textarea>
+  <button id="copy-css">Copy CSS</button>
+</div>
 
   <!-- 🧠 Script logic -->
   <script src="scripts.js"></script>
