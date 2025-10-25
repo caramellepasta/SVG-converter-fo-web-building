@@ -25,14 +25,31 @@
   <!-- 🧩 Main layout container: Mapper + Preview side-by-side -->
   <div class="container">
     
-    <!-- 🧱 Mapper Panel (left) -->
-    <div class="mapper-panel">
-      <!-- 📂 Upload SVG -->
-      <label for="svg-upload"><strong>Upload SVG:</strong></label>
-      <input type="file" id="svg-upload" accept=".svg" />
+   <!-- 🧱 Mapper Panel (left) -->
+<div class="mapper-panel">
+  <!-- 📂 Upload SVG -->
+  <label for="svg-upload"><strong>Upload SVG:</strong></label>
+  <input type="file" id="svg-upload" accept=".svg" />
 
-      <!-- 🔍 SVG Preview -->
-      <div id="svg-preview"></div>
+  <!-- 🧩 Split into two columns: group list + SVG preview -->
+  <div class="mapper-columns">
+    <!-- 📁 SVG group list -->
+    <div id="group-list-container"></div>
+
+    <!-- 🔍 SVG Preview -->
+    <div id="svg-preview"></div>
+  </div>
+
+  <!-- 🏷️ Semantic Tag Selector -->
+  <div id="tag-selector" style="display:none;">
+    <!-- ... your tag selector dropdown ... -->
+  </div>
+
+  <!-- ⚙️ Options -->
+  <fieldset>
+    <!-- ... your background options ... -->
+  </fieldset>
+</div>
 
       <!-- 🏷️ Semantic Tag Selector -->
       <div id="tag-selector" style="display:none;">
