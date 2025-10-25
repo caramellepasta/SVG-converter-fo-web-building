@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 🌟 Grab references to key elements
-  console.log("scripts.js loaded successfully!");
+  console.log("Progressive Builder loaded");
+
+  // 🌟 Grab references
   const svgContainer = document.getElementById("svg-preview");
   const fileInput = document.getElementById("svg-upload");
   const tagSelector = document.getElementById("tag-selector");
@@ -9,13 +10,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeOutput = document.getElementById("code-output");
   const cssOutput = document.getElementById("css-output");
   const previewFrame = document.getElementById("live-preview");
+  const groupListContainer = document.getElementById("group-list-container");
 
   const bgEnabled = document.getElementById("background-enabled");
   const bgFullscreen = document.getElementById("background-fullscreen");
   const bgRepeat = document.getElementById("background-repeat");
   const bgAbsolute = document.getElementById("background-absolute");
-  const useSvgSource = document.getElementById("use-svg-source");
 
+  const modeSelect = document.getElementById("mode-select");
+  const modeLabel = document.getElementById("mode-label");
+
+  // 🌓 Multi-mapper: keep mappings per mode
+  const mappings = {
+    light: {}, // { elementId: { tag, text, font, fill, styles } }
+    dark: {}
+  };
+  let currentMode = modeSelect.value;
+
+  // 🔎 Selection state
   let selectedElement = null;
 
   // 📂 Load and preview SVG
@@ -35,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsText(e.target.files[0]);
   });
 
-  // 🖱️ Enable click-to-select
+  // 🖱️ Enable click-to-select (adds a red outline)
   function enableSelection(container) {
     const elements = container.querySelectorAll("*");
     elements.forEach(el => {
@@ -50,124 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🧱 Generate HTML + CSS
-  applyTag.addEventListener("click", () => {
-    if (!selectedElement) return;
-
-    const tag = semanticTag.value;
-    const id = selectedElement.id || "svg-part";
-    const className = id.replace(/\s+/g, "_");
-
-    // 📝 Extract inner text content
-    const innerText = selectedElement.textContent?.trim() || "";
-    const html = `<${tag} class="${className}">${innerText}</${tag}>`;
-
-    // 🔤 Detect font-family
-    let fontFamily = selectedElement.getAttribute("font-family");
-    if (!fontFamily && selectedElement.hasAttribute("style")) {
-      const style = selectedElement.getAttribute("style");
-
-      const matchFamily = style.match(/font-family:\s*['"]?([^;"']+)/);
-      if (matchFamily) fontFamily = matchFamily[1];
-
-      if (!fontFamily) {
-        const matchFont = style.match(/font:\s*[^;]*\s([^;"']+)/);
-        if (matchFont) fontFamily = matchFont[1];
-      }
-    }
-
-    // 🧩 Prepare Google Fonts link
-    let fontLink = "";
-    if (fontFamily) {
-      const googleFont = fontFamily.replace(/\s+/g, "+");
-      fontLink = `<link href="https://fonts.googleapis.com/css2?family=${googleFont}&display=swap" rel="stylesheet">`;
-    }
-
-    // 🎨 Extract fill color
-    let fill = selectedElement.getAttribute("fill");
-    if (!fill && selectedElement.hasAttribute("style")) {
-      const match = selectedElement.getAttribute("style").match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
-      if (match) fill = match[1];
-    }
-    if (!fill && selectedElement.children?.length > 0) {
-      for (let child of selectedElement.children) {
-        let childFill = child.getAttribute("fill");
-        if (!childFill && child.hasAttribute("style")) {
-          const match = child.getAttribute("style").match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
-          if (match) childFill = match[1];
-        }
-        if (childFill && childFill !== "none") {
-          fill = childFill;
-          break;
-        }
-      }
-    }
-const isBlack = /^(black|#000000|#000|rgb\(0,\s*0,\s*0\))$/i;
-if (fill && isBlack.test(fill)) {
-  fill = "#ccc"; // or any default you prefer
-}
-
-    // 📐 Extract size
-    const bbox = selectedElement.getBBox?.();
-    const width = `${bbox?.width?.toFixed(2) || "100%"}`;
-    const height = `${bbox?.height?.toFixed(2) || "auto"}`;
-
-    // 🎨 Build CSS
-    let css = `.${className} {`;
-    if (bgEnabled.checked) {
-      css += `\n  background-color: ${fill};`;
-      css += `\n  background-repeat: ${bgRepeat.checked ? "repeat" : "no-repeat"};`;
-      css += bgFullscreen.checked
-        ? `\n  width: 100vw;\n  height: 100vh;`
-        : `\n  width: ${width};\n  height: ${height};`;
-      if (bgAbsolute.checked) {
-        css += `\n  position: absolute;\n  z-index: -1;`;
-      }
-    } else {
-      css += `\n  background: ${fill};`;
-      css += `\n  width: ${width};\n  height: ${height};`;
-    }
-    css += `\n}\n`;
-
-    // 🧾 Output HTML + CSS
-    codeOutput.value += html + "\n\n";
-    cssOutput.value += css + "\n";
-
-    // 🌐 Inject live preview
-    const safeHTML = codeOutput.value.replace(/<\/script>/gi, "<\\/script>");
-    const safeCSS = cssOutput.value.replace(/<\/style>/gi, "<\\/style>");
-
-    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-    const combinedHTML = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Preview</title>
-  ${fontLink}
-  <style>
-    body {
-      font-family: ${fontFamily ? fontFamily.replace(/["']/g, "") : "sans-serif"};
-    }
-    ${safeCSS}
-  </style>
-</head>
-<body>
-  ${safeHTML}
-</body>
-</html>
-`;
-    previewDoc.open();
-    previewDoc.write(combinedHTML);
-    previewDoc.close();
-
-    selectedElement.classList.remove("selected");
-    selectedElement = null;
-    tagSelector.style.display = "none";
-  });
-
-  // 📁 List SVG groups
+  // 📁 List SVG groups for quick selection
   function scanGroups(svgRoot) {
     const groups = svgRoot.querySelectorAll("g");
     const groupList = document.createElement("ul");
@@ -185,15 +80,18 @@ if (fill && isBlack.test(fill)) {
         group.classList.add("selected");
         tagSelector.style.display = "block";
         suggestTag(group);
+        // Scroll into view for convenience
+        group.scrollIntoView({ behavior: "smooth", block: "center" });
       };
 
       groupList.appendChild(item);
     });
 
-    document.body.appendChild(groupList);
+    groupListContainer.innerHTML = "";
+    groupListContainer.appendChild(groupList);
   }
 
-  // 🧠 Suggest semantic tag
+  // 🧠 Suggest a semantic tag based on heuristics
   function suggestTag(el) {
     const id = el.id?.toLowerCase() || "";
     const bbox = el.getBBox?.();
@@ -216,5 +114,188 @@ if (fill && isBlack.test(fill)) {
     }
 
     semanticTag.value = suggestion;
-  } // end suggestTag
-}); // end DOMContentLoaded
+  }
+
+  // 🧱 Apply mapping (progressive builder)
+  applyTag.addEventListener("click", () => {
+    if (!selectedElement) return;
+
+    const tag = semanticTag.value;
+    const id = selectedElement.id || `el-${Date.now()}`;
+    const className = id.replace(/\s+/g, "_");
+
+    // 📝 Extract inner text
+    const innerText = selectedElement.textContent?.trim() || "";
+
+    // 🔤 Detect font-family (from attribute or style)
+    let fontFamily = selectedElement.getAttribute("font-family");
+    if (!fontFamily && selectedElement.hasAttribute("style")) {
+      const style = selectedElement.getAttribute("style");
+      const matchFamily = style.match(/font-family:\s*['"]?([^;"']+)/);
+      if (matchFamily) fontFamily = matchFamily[1];
+      if (!fontFamily) {
+        const matchFont = style.match(/font:\s*[^;]*\s([^;"']+)/);
+        if (matchFont) fontFamily = matchFont[1];
+      }
+    }
+    const cleanFont = fontFamily ? fontFamily.replace(/['"]/g, "").split(",")[0].trim() : "";
+
+    // 🎨 Extract fill color (fallback to child fills)
+    let fill = selectedElement.getAttribute("fill");
+    if (!fill && selectedElement.hasAttribute("style")) {
+      const match = selectedElement.getAttribute("style").match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\)|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/i);
+      if (match) fill = match[1];
+    }
+    if (!fill && selectedElement.children?.length > 0) {
+      for (let child of selectedElement.children) {
+        let childFill = child.getAttribute("fill");
+        if (!childFill && child.hasAttribute("style")) {
+          const match = child.getAttribute("style").match(/fill:\s*(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\)|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/i);
+          if (match) childFill = match[1];
+        }
+        if (childFill && childFill !== "none") {
+          fill = childFill;
+          break;
+        }
+      }
+    }
+    // Normalize "pure black" fills (avoid invisible text on dark BGs)
+    const isBlack = /^(black|#000000|#000|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))$/i;
+    if (fill && isBlack.test(fill)) fill = "#ccc";
+
+    // 📐 Sizing (optional, used when background is enabled)
+    const bbox = selectedElement.getBBox?.();
+    const width = `${bbox?.width?.toFixed(2) || "auto"}`;
+    const height = `${bbox?.height?.toFixed(2) || "auto"}`;
+
+    // 🧩 Store/update mapping for current mode and element
+    mappings[currentMode][id] = {
+      tag,
+      className,
+      text: innerText,
+      font: cleanFont || "",
+      fill: fill || "",
+      size: { width, height },
+      bg: {
+        enabled: bgEnabled.checked,
+        fullscreen: bgFullscreen.checked,
+        repeat: bgRepeat.checked,
+        absolute: bgAbsolute.checked
+      }
+    };
+
+    // 🔁 Regenerate outputs for the current mode
+    regenerateOutputs();
+    // ✅ Clear selection UI state
+    selectedElement.classList.remove("selected");
+    selectedElement = null;
+    tagSelector.style.display = "none";
+  });
+
+  // 🔁 Regenerate HTML + CSS from model for the current mode
+  function regenerateOutputs() {
+    const model = mappings[currentMode];
+    let html = "";
+    let css = "";
+    const fontSet = new Set();
+
+    const structural = ["header", "footer", "nav", "section", "article", "aside"];
+
+    for (const [id, data] of Object.entries(model)) {
+      // ✅ Build HTML (wrap text for structural tags so content shows)
+      const content = structural.includes(data.tag)
+        ? `<p>${escapeHtml(data.text)}</p>`
+        : escapeHtml(data.text);
+
+      html += `<${data.tag} class="${data.className}">${content}</${data.tag}>\n`;
+
+      // ✅ Build CSS (apply font only to the class, not globally)
+      css += `.${data.className} {\n`;
+      if (data.font) {
+        css += `  font-family: '${data.font}', sans-serif;\n`;
+        fontSet.add(data.font);
+      }
+      if (data.fill) {
+        // Use fill as text color; background optional
+        css += `  color: ${data.fill};\n`;
+      }
+      if (data.bg?.enabled) {
+        // Basic background styling derived from fill
+        css += `  background-color: ${data.fill || "#f0f0f0"};\n`;
+        css += `  background-repeat: ${data.bg.repeat ? "repeat" : "no-repeat"};\n`;
+        if (data.bg.fullscreen) {
+          css += `  width: 100vw;\n  height: 100vh;\n`;
+        } else {
+          css += `  width: ${data.size.width};\n  height: ${data.size.height};\n`;
+        }
+        if (data.bg.absolute) {
+          css += `  position: absolute;\n  z-index: -1;\n`;
+        }
+      }
+      css += `}\n\n`;
+    }
+
+    // 🧾 Update textareas
+    codeOutput.value = html.trim();
+    cssOutput.value = css.trim();
+
+    // 🌐 Update live preview (inject unique font links and scoped CSS)
+    updatePreview(html, css, Array.from(fontSet));
+  }
+
+  // 🌐 Live preview: build full HTML doc and inject into iframe
+  function updatePreview(html, css, fonts = []) {
+    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+    // Build unique Google Font links
+    const fontLinks = fonts
+      .filter(Boolean)
+      .map(f => `<link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(f).replace(/%20/g, "+")}&display=swap" rel="stylesheet">`)
+      .join("\n");
+
+    const combinedHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Preview</title>
+  ${fontLinks}
+  <style>
+    /* Reset preview defaults for clarity */
+    body { margin: 1rem; font-family: sans-serif; }
+    ${css}
+  </style>
+</head>
+<body>
+${html}
+</body>
+</html>`;
+
+    previewDoc.open();
+    previewDoc.write(combinedHTML);
+    previewDoc.close();
+  }
+
+  // 🌓 Mode switching: preserve mappings per mode and regenerate
+  modeSelect.addEventListener("change", () => {
+    currentMode = modeSelect.value;
+    modeLabel.textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1);
+    regenerateOutputs();
+  });
+
+  // 📋 Copy buttons
+  document.getElementById("copy-html").addEventListener("click", () => {
+    navigator.clipboard.writeText(codeOutput.value);
+  });
+  document.getElementById("copy-css").addEventListener("click", () => {
+    navigator.clipboard.writeText(cssOutput.value);
+  });
+
+  // 🛡️ Helper: basic HTML escape for text injection safety
+  function escapeHtml(str) {
+    return (str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+});
