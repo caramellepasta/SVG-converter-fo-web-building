@@ -1,0 +1,419 @@
+/* =============================
+   🎛️ Design tokens
+   ============================= */
+:root {
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Colors */
+  --bg: #ffffff;
+  --bg-elev: #f7f7f8;
+  --text: #1c1e21;
+  --muted: #5b6068;
+  --accent: #0078d7;
+  --accent-hover: #005a9e;
+  --accent-contrast: #ffffff;
+  --border-color: #dadce0;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  /* Shape */
+  --radius: 8px;
+  --border: 1px solid var(--border-color);
+
+  /* Motion */
+  --fast: 160ms;
+
+  /* Layout baseline heights */
+  --preview-row-min-h: 520px;
+  --options-row-min-h: 320px;
+}
+
+/* =============================
+   🧱 Base
+   ============================= */
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+/* =============================
+   🏷️ Header
+   ============================= */
+.app-header {
+  text-align: center;
+  padding: var(--space-5) var(--space-4);
+  background: var(--bg-elev);
+  border-bottom: var(--border);
+}
+
+.app-title {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.app-tagline {
+  font-size: 1rem;
+  margin: var(--space-2) 0;
+  color: var(--muted);
+}
+
+.app-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* =============================
+   🎛️ Top bar
+   ============================= */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border);
+  background: var(--bg);
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+/* =============================
+   🔘 Buttons
+   ============================= */
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background var(--fast), transform var(--fast);
+  text-align: center;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn.btn-outline:hover {
+  background: rgba(0, 120, 215, 0.08);
+}
+
+.btn.btn-subtle {
+  background: #eef5ff;
+  color: #0b3d91;
+  border: 1px solid #cfe2ff;
+}
+
+.btn.btn-subtle:hover {
+  background: #e0edff;
+}
+/* =============================
+   🧩 Layout: Sidebar + Workspace
+   ============================= */
+.mapper-layout {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.mapper-layout > .row {
+  align-items: stretch;
+}
+
+/* Sidebar: fixed width, vertical stack */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow: hidden; /* contain long text */
+}
+
+.sidebar .panel:first-child {
+  flex: 2;
+}
+.sidebar .panel:last-child {
+  flex: 1;
+}
+
+/* Workspace: fills remaining width */
+.workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* =============================
+   📦 Panels
+   ============================= */
+.panel {
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* contain children */
+}
+
+.panel h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+/* =============================
+   🌳 Tree list (hierarchical)
+   ============================= */
+.tree-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;       /* scroll if content too tall */
+  max-height: 100%;
+}
+
+.tree-item {
+  margin-bottom: var(--space-2);
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tree-label {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background var(--fast);
+  flex: 1;
+  white-space: nowrap;       /* prevent overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;   /* truncate with … */
+}
+
+.tree-label:hover {
+  background: #eceff4;
+}
+
+.tree-label.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.tree-eye,
+.tree-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 2px 4px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tree-eye:hover,
+.tree-toggle:hover {
+  color: var(--accent);
+}
+
+.tree-sublist {
+  list-style: none;
+  margin-left: var(--space-3);
+  padding-left: var(--space-2);
+  border-left: 1px dashed #ccc;
+}
+
+.tree-sublist.collapsed {
+  display: none;
+}
+
+/* =============================
+   🖼️ SVG Preview constraints
+   ============================= */
+.preview-row {
+  display: flex;
+  gap: var(--space-4);
+  min-height: var(--preview-row-min-h);
+}
+
+.preview-row .panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.svg-frame,
+.live-frame {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: var(--space-3);
+  overflow: auto; /* scroll instead of stretch */
+}
+
+.svg-frame {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: var(--space-3);
+  overflow: auto; /* scroll instead of stretch */
+}
+
+.svg-frame svg {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;   /* force fit */
+  height: auto;  /* keep aspect ratio */
+}
+
+svg [data-group-id].active,
+svg .active {
+  outline: 2px dashed var(--accent);
+  filter: drop-shadow(0 0 6px rgba(0, 120, 215, 0.6));
+}/* =============================
+   🔧 Options & Code row
+   ============================= */
+.options-row {
+  display: flex;
+  gap: var(--space-4);
+  min-height: var(--options-row-min-h);
+}
+
+.options-row .panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Options panel content fills height */
+.options-panel {
+  flex: 1;
+  border: 1px solid #e2e6ea;
+  border-radius: var(--radius);
+  background: #fff;
+  padding: var(--space-3);
+}
+
+/* =============================
+   🧾 Code tabs + outputs
+   ============================= */
+.code-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.tab {
+  padding: var(--space-2) var(--space-3);
+  background: #eef5ff;
+  color: #0b3d91;
+  border: 1px solid #cfe2ff;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.tab:hover {
+  background: #e0edff;
+}
+
+/* Code output fills panel height */
+.code-output {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e2e6ea;
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  font-family: monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  min-height: 160px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* =============================
+   👀 Debug overlay
+   ============================= */
+.debug-overlay * {
+  outline: 1px dashed rgba(255, 0, 0, 0.4);
+}
+
+/* =============================
+   📱 Responsive tweaks
+   ============================= */
+@media (max-width: 900px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .preview-row {
+    min-height: 360px;
+  }
+
+  .options-row {
+    min-height: auto;
+  }
+
+  .sidebar {
+    width: auto;
+  }
+
+  .code-tabs {
+    justify-content: center;
+  }
+}
+/* Debug: force neutral backdrop and show everything */
+#svgPreview { background:#fff !important; overflow: visible !important; padding:12px !important; }
+#svgPreview svg { opacity:1 !important; filter:none !important; mix-blend-mode:normal !important; transform:none !important; display:block !important; max-width:100% !important; max-height:100% !important; }
+#svgPreview svg * { outline:1px dashed rgba(200,20,20,0.18) !important; }
+}
