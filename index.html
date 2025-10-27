@@ -1,93 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SVG to HTML Mapper — Progressive Builder</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🖌️ Inkscape SVG to HTML Mapper</title>
+  <link rel="stylesheet" href="css.css" />
 </head>
-<body>
-  <!-- 🧠 Tool Title -->
-  <h1>SVG to HTML Mapper (Progressive Builder)</h1>
+<body class="theme-light">
 
-  <!-- 🌓 Mode selector -->
-  <div class="toolbar">
-    <label for="mode-select"><strong>Mode:</strong></label>
-    <select id="mode-select">
-      <option value="light" selected>Light</option>
-      <option value="dark">Dark</option>
+  <!-- =============================
+       🏷️ Header
+       ============================= -->
+  <header class="app-header">
+    <h1 class="app-title">Inkscape SVG to HTML page</h1>
+    <p class="app-tagline">Hate coding? Me 2! So I made this!</p>
+    <p class="app-note">
+      ⚠️ *If you use custom fonts, only those from the Google Font store will work.* ⚠️
+    </p>
+  </header>
+
+  <!-- =============================
+       🎛️ Top bar: Mode + Upload + Zoom
+       ============================= -->
+  <div class="top-bar">
+    <!-- 🌗 Mode selector -->
+    <label for="modeSelect">🌗 Mode:</label>
+    <select id="modeSelect">
+      <option value="light" selected>☀️ Light</option>
+      <option value="dark">🌙 Dark</option>
     </select>
-  </div>
 
-  <!-- 🧩 Main container: two columns -->
-  <div class="container">
-
-    <!-- 📂 Mapper Panel (left column) -->
-    <div class="mapper-panel">
-      <!-- Upload -->
-      <label for="svg-upload"><strong>Upload SVG:</strong></label>
-      <input type="file" id="svg-upload" accept=".svg" />
-
-      <!-- Group list + Options stacked -->
-      <div id="group-list-container"></div>
-
-      <fieldset>
-        <legend>Options</legend>
-        <label><input type="checkbox" id="background-enabled" /> Enable background styling</label><br />
-        <label><input type="checkbox" id="background-fullscreen" /> Full screen (100vw x 100vh)</label><br />
-        <label><input type="checkbox" id="background-repeat" /> Repeat background</label><br />
-        <label><input type="checkbox" id="background-absolute" /> Position absolute</label>
-      </fieldset>
-
-      <!-- SVG Preview -->
-      <div id="svg-preview"></div>
-
-      <!-- Semantic Tag Selector -->
-      <div id="tag-selector" style="display:none;">
-        <label for="semantic-tag">Choose a semantic HTML tag:</label>
-        <select id="semantic-tag">
-          <option value="section">section</option>
-          <option value="header">header</option>
-          <option value="footer">footer</option>
-          <option value="nav">nav</option>
-          <option value="main">main</option>
-          <option value="article">article</option>
-          <option value="aside">aside</option>
-          <option value="h1">h1</option>
-          <option value="h2">h2</option>
-          <option value="h3">h3</option>
-          <option value="p">p</option>
-          <option value="button">button</option>
-          <option value="form">form</option>
-          <option value="label">label</option>
-          <option value="input">input</option>
-          <option value="figure">figure</option>
-          <option value="figcaption">figcaption</option>
-          <option value="ul">ul</option>
-          <option value="ol">ol</option>
-          <option value="li">li</option>
-          <option value="blockquote">blockquote</option>
-        </select>
-        <button id="apply-tag">Map element</button>
-      </div>
+    <!-- 📂 Upload SVG file -->
+    <div class="file-upload">
+      <label for="svgFile" class="btn btn-outline">📂 Upload SVG</label>
+      <input type="file" id="svgFile" accept=".svg" />
     </div>
 
-    <!-- 🌐 Live Preview Panel (right column) -->
-    <div class="preview-panel">
-      <h2>Live Preview (<span id="mode-label">Light</span>)</h2>
-      <iframe id="live-preview"></iframe>
+    <!-- 🔍 Zoom to Fit -->
+    <button id="zoomToFit" class="btn">🔍 Zoom to Fit</button>
+  </div>
 
-      <!-- Code Viewer -->
-      <div class="code-viewer">
-        <div class="code-toolbar">
-          <button id="show-html" class="active">HTML</button>
-          <button id="show-css">CSS</button>
+  <!-- =============================
+       🧩 Main Layout: Sidebar + Workspace
+       ============================= -->
+  <main class="mapper-layout">
+    <div class="row">
+
+      <!-- 🌳 Sidebar -->
+      <aside class="sidebar">
+        <!-- 🌳 SVG Groups Layers -->
+        <div class="panel">
+          <h2>🌳 SVG Groups Layers</h2>
+          <ul id="layerTree" class="tree-list"></ul>
         </div>
-        <textarea id="code-output" rows="12"></textarea>
-      </div>
-    </div>
-  </div>
 
-  <!-- Script -->
+        <!-- ⚙️ Element Generators -->
+        <div class="panel">
+          <h2>⚙️ Element Generators</h2>
+          <div class="element-buttons">
+            <button data-panel="background" class="btn btn-subtle">🖼️ Background</button>
+            <button data-panel="header" class="btn btn-subtle">🏷️ Header</button>
+            <button data-panel="button" class="btn btn-subtle">🔘 Button</button>
+            <button data-panel="footer" class="btn btn-subtle">📌 Footer</button>
+            <button data-panel="nav" class="btn btn-subtle">🧭 Nav</button>
+            <button data-panel="countdown" class="btn btn-subtle">⏳ Countdown</button>
+            <button data-panel="menu" class="btn btn-subtle">📋 Menu</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 🖼️ Workspace -->
+      <section class="workspace">
+
+        <!-- 🖼️ + 🖥️ Preview Row -->
+        <div class="row preview-row">
+          <!-- 🖼️ SVG Preview -->
+          <div class="panel">
+            <h2>🖼️ SVG Preview</h2>
+            <div id="svgPreview" class="svg-frame"></div>
+          </div>
+
+          <!-- 🖥️ Live HTML Preview -->
+          <div class="panel">
+            <h2>🖥️ Live HTML Preview</h2>
+            <div class="live-frame" id="livePreview"></div>
+          </div>
+        </div>
+
+        <!-- 🔧 + 🧾 Options & Codes Row -->
+        <div class="row options-row">
+          <!-- 🔧 Element Options -->
+          <div class="panel">
+            <h2>🔧 Element Options</h2>
+            <div id="elementOptions" class="options-panel">
+              <p>👉 Select an element button to see options here.</p>
+            </div>
+          </div>
+
+          <!-- 🧾 Generated Codes -->
+          <div class="panel">
+            <h2>🧾 Generated Codes</h2>
+            <div class="code-tabs">
+              <button class="tab" data-target="html">HTML</button>
+              <button class="tab" data-target="css">CSS</button>
+              <button class="tab" data-target="js">JS</button>
+              <button class="tab" data-target="reorganize">Re-organise</button>
+              <button class="tab" data-target="clear">Clear</button>
+            </div>
+            <div class="code-output" id="code-html"></div>
+            <div class="code-output hidden" id="code-css"></div>
+            <div class="code-output hidden" id="code-js"></div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- =============================
+       📜 JavaScript
+       ============================= -->
   <script src="scripts.js"></script>
+
 </body>
 </html>
