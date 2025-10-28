@@ -1,12 +1,13 @@
 /* =============================
-   Inkscape SVG → HTML Mapper
-   Robust scripts.js — Upload handler fixed + resilient init + debug helpers
-   Replace your existing scripts.js with this file
+  Copy Pasted for Copilot Inkscape SVG → HTML Mapper
+   Robust scripts.v2.js — resilient init + upload handler + debug helpers
+   Drop this file in place of the broken hosted script and reference it
+   with: <script src="scripts.v2.js" defer></script>
    ============================= */
 (function () {
   "use strict";
 
-  /* ======= Refs (DOM element IDs) ======= */
+  /* ======= DOM IDs (adjust if your HTML uses different IDs) ======= */
   const svgPreviewId = "svgPreview";
   const svgFileId = "svgFile";
   const livePreviewId = "livePreview";
@@ -18,6 +19,7 @@
   const modeSelectId = "modeSelect";
   const debugToggleId = "debugToggle";
 
+  /* ======= Runtime refs (populated on init) ======= */
   let svgFileInput = null;
   let svgPreview = null;
   let livePreview = null;
@@ -29,9 +31,11 @@
   let modeSelect = null;
   let debugToggle = null;
 
+  /* ======= Constants ======= */
   const VISUAL_SCALE_THRESHOLD = 1.15;
   const DESIRED_FILL = 0.72;
 
+  /* ======= Helpers ======= */
   function qs(id) { return document.getElementById(id); }
 
   function el(tag, props = {}) {
@@ -63,6 +67,7 @@
     catch (e) { return svgPreview.querySelector(`[id="${id}"]`); }
   }
 
+  /* ======= ViewBox + background rect helpers ======= */
   function safeKeepAuthorViewBox(svgEl) {
     if (!svgEl) return;
     const hasVB = svgEl.hasAttribute("viewBox");
@@ -105,7 +110,9 @@
       const rx = parseSvgNumeric(rect.getAttribute("x")) || 0;
       const ry = parseSvgNumeric(rect.getAttribute("y")) || 0;
       const opa = parseFloat(rect.getAttribute("opacity") || getComputedStyle(rect).opacity || 1);
-      const covers = !isNaN(rw) && !isNaN(rh) && Math.abs(rw - vw) < 1 && Math.abs(rh - vh) < 1 && Math.abs(rx - vx) < 1 && Math.abs(ry - vy) < 1;
+      const covers = !isNaN(rw) && !isNaN(rh) &&
+                     Math.abs(rw - vw) < 1 && Math.abs(rh - vh) < 1 &&
+                     Math.abs(rx - vx) < 1 && Math.abs(ry - vy) < 1;
       if (covers && opa >= 0.99) {
         rect.style.display = "none";
         rect.dataset.__hidden_by_mapper = "true";
@@ -114,6 +121,7 @@
     });
   }
 
+  /* ======= Preview helpers ======= */
   function injectSvgIntoPreview(svgEl) {
     if (!svgPreview) return;
     let wrapper = svgPreview.querySelector(".svg-wrapper");
@@ -169,6 +177,7 @@
     hidePageSizedRects(svgEl);
   }
 
+  /* ======= Layer tree builder (minimal) ======= */
   function getGroupLabel(g, idx) {
     return g.getAttribute("inkscape:label") || g.getAttribute("sodipodi:label") || g.getAttribute("data-name") || g.id || `group-${idx+1}`;
   }
@@ -246,6 +255,7 @@
     makeList(topGroups, layerTree);
   }
 
+  /* ======= Tabs and UI wiring ======= */
   function initTabsAndUi() {
     const tabs = document.querySelectorAll(".tab");
     const outputs = { html: codeHtml, css: codeCss, js: codeJs };
@@ -277,6 +287,7 @@
     }
   }
 
+  /* ======= Parse + inject ======= */
   function parseAndInjectSvgString(svgString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
@@ -294,6 +305,7 @@
     return { svgEl };
   }
 
+  /* ======= Resilient file attach (idempotent) ======= */
   function installHandlerOn(inputEl) {
     if (!inputEl) return false;
     if (inputEl._mapperHandler) {
@@ -347,6 +359,7 @@
     });
   }
 
+  /* ======= Expose init + helpers ======= */
   window.__svgMapper = window.__svgMapper || {};
   window.__svgMapper.init = window.__svgMapper.init || function() {
     waitAndInstall().then(ok => {
@@ -373,9 +386,7 @@
     refreshRefs();
     initTabsAndUi();
     if (zoomBtn) {
-      try {
-        zoomBtn.removeEventListener("click", zoomBtn._mapperZoom);
-      } catch (e) {}
+      try { zoomBtn.removeEventListener("click", zoomBtn._mapperZoom); } catch (e) {}
       zoomBtn._mapperZoom = function () {
         const svgEl = svgPreview ? svgPreview.querySelector("svg") : null;
         if (!svgEl) return;
@@ -387,6 +398,7 @@
     }
   }
 
+  /* ======= Debug helpers ======= */
   function logSvgSnapshot(svgEl, label = "SVG") {
     if (!svgEl) return;
     const vb = svgEl.getAttribute("viewBox");
@@ -452,6 +464,7 @@
     }
   });
 
+  /* ======= Auto init on DOM ready ======= */
   function autoInit() {
     refreshRefs();
     attachUiHelpers();
