@@ -268,22 +268,63 @@
     }
   }
 
-  function parseAndInjectSvgString(svgString){
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(svgString, "image/svg+xml");
-    var svgEl = doc.documentElement;
-    if(!svgEl || svgEl.tagName.toLowerCase() !== "svg"){
-      svgEl = doc.querySelector("svg");
-      if(!svgEl) return { error: "no-svg" };
+ function normalizeAndInject(svgNode) {
+  if (!svgNode) return;
+  // ensure we have a clone in the current document
+  const clone = svgNode.cloneNode(true);
+
+  // remove Inkscape/page metadata nodes that can expand layout
+  Array.from(clone.querySelectorAll("sodipodi\\:namedview, metadata, title, desc")).forEach(n => n.remove());
+
+  // remove page-sized rects (common background from Inkscape)
+  Array.from(clone.querySelectorAll("rect")).forEach(r => {
+    const rw = parseFloat(r.getAttribute("width") || 0);
+    const rh = parseFloat(r.getAttribute("height") || 0);
+    if (rw > 0 && rh > 0) {
+      const vb = clone.getAttribute("viewBox");
+      if (vb) {
+        const [vx,vy,vw,vh] = vb.split(/\s+/).map(parseFloat);
+        if (Math.abs(rw - vw) < 1 && Math.abs(rh - vh) < 1) r.remove();
+      }
     }
-    svgEl = svgEl.cloneNode(true);
-    safeKeepAuthorViewBox(svgEl);
-    hidePageSizedRects(svgEl);
-    injectSvgIntoPreview(svgEl);
-    forcePreviewVisibility(svgEl, svgPreview);
-    buildLayerTree(svgEl);
-    return { svgEl: svgEl };
+  });
+
+  // ensure viewBox exists: if missing try to infer from width/height
+  if (!clone.hasAttribute("viewBox")) {
+    const w = parseFloat(clone.getAttribute("width"));
+    const h = parseFloat(clone.getAttribute("height"));
+    if (isFinite(w) && isFinite(h) && w > 0 && h > 0) clone.setAttribute("viewBox", `0 0 ${w} ${h}`);
   }
+
+  // remove fixed width/height so CSS controls sizing
+  clone.removeAttribute("width");
+  clone.removeAttribute("height");
+
+  // ensure preserveAspectRatio
+  if (!clone.getAttribute("preserveAspectRatio")) clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  // append to wrapper
+  let wrapper = document.querySelector("#svgPreview .svg-wrapper");
+  if (!wrapper) {
+    wrapper = document.createElement("div");
+    wrapper.className = "svg-wrapper";
+    const preview = document.getElementById("svgPreview");
+    if (!preview) return;
+    preview.innerHTML = "";
+    preview.appendChild(wrapper);
+  } else {
+    wrapper.innerHTML = "";
+  }
+  wrapper.appendChild(clone);
+
+  // styling to keep it contained
+  clone.style.maxWidth = "100%";
+  clone.style.maxHeight = "100%";
+  clone.style.width = "auto";
+  clone.style.height = "auto";
+  clone.style.display = "block";
+}
+
 
   function installHandlerOn(inputEl){
     if(!inputEl) return false;
