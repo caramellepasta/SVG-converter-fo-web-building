@@ -238,5 +238,51 @@
   } else {
     document.addEventListener("DOMContentLoaded", autoInit);
   }
+reader.onload = function(e) {
+  var txt = e.target.result || "";
+
+  // keep a small, copyable slice in the live preview to avoid huge DOM costs
+  var maxPreview = 200000; // adjust if you want more
+  if (refs && refs.livePreview) {
+    refs.livePreview.textContent = txt.length > maxPreview ? txt.slice(0, maxPreview) + "\n\n...TRUNCATED..." : txt;
+  }
+
+  // parse into a document and import the svg node into this document
+  var doc = new DOMParser().parseFromString(txt, "image/svg+xml");
+  var svgEl = doc.querySelector("svg");
+  if (!svgEl) return;
+
+  // import into current document so events, queries and tree-building work
+  var svgClone = document.importNode(svgEl, true);
+
+  // normalize minimal metadata and sizing
+  Array.from(svgClone.querySelectorAll("sodipodi\\:namedview, metadata, title, desc")).forEach(n => n.remove());
+  if (!svgClone.getAttribute("viewBox")) {
+    var w = parseFloat(svgClone.getAttribute("width"));
+    var h = parseFloat(svgClone.getAttribute("height"));
+    if (isFinite(w) && isFinite(h) && w > 0 && h > 0) svgClone.setAttribute("viewBox", "0 0 " + w + " " + h);
+  }
+  svgClone.removeAttribute("width");
+  svgClone.removeAttribute("height");
+  if (!svgClone.getAttribute("preserveAspectRatio")) svgClone.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  // insert into preview wrapper
+  var preview = document.getElementById("svgPreview");
+  if (!preview) return;
+  var wrapper = preview.querySelector(".svg-wrapper");
+  if (!wrapper) { wrapper = document.createElement("div"); wrapper.className = "svg-wrapper"; preview.appendChild(wrapper); }
+  wrapper.innerHTML = "";
+  wrapper.appendChild(svgClone);
+
+  // ensure style constraints
+  svgClone.style.display = "block";
+  svgClone.style.maxWidth = "100%";
+  svgClone.style.maxHeight = "100%";
+  svgClone.style.width = "auto";
+  svgClone.style.height = "auto";
+
+  // rebuild layer tree from the root imported clone
+  if (typeof buildLayerTree === "function") buildLayerTree(svgClone);
+};
 
 })();
