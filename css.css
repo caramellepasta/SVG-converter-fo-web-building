@@ -38,13 +38,13 @@
    ============================= */
 html, body {
   height: 100%;
+  margin: 0;
 }
 
 body {
   font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
-  margin: 0;
 }
 
 /* =============================
@@ -107,33 +107,23 @@ body {
   text-align: center;
 }
 
-.btn:hover {
-  background: var(--accent-hover);
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
+.btn:hover { background: var(--accent-hover); }
+.btn:active { transform: scale(0.98); }
 
 .btn.btn-outline {
   background: transparent;
   color: var(--accent);
   border: 1px solid var(--accent);
 }
-
-.btn.btn-outline:hover {
-  background: rgba(0, 120, 215, 0.08);
-}
+.btn.btn-outline:hover { background: rgba(0, 120, 215, 0.08); }
 
 .btn.btn-subtle {
   background: #eef5ff;
   color: #0b3d91;
   border: 1px solid #cfe2ff;
 }
+.btn.btn-subtle:hover { background: #e0edff; }
 
-.btn.btn-subtle:hover {
-  background: #e0edff;
-}
 /* =============================
    🧩 Layout: Sidebar + Workspace
    ============================= */
@@ -143,33 +133,22 @@ body {
   padding: var(--space-4);
 }
 
-.row {
-  display: flex;
-  gap: var(--space-4);
-}
+.row { display: flex; gap: var(--space-4); }
+.mapper-layout > .row { align-items: stretch; }
 
-.mapper-layout > .row {
-  align-items: stretch;
-}
-
-/* Sidebar: fixed width, vertical stack */
+/* Sidebar */
 .sidebar {
   width: 200px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  overflow: hidden; /* contain long text */
+  overflow: hidden;
 }
+.sidebar .panel:first-child { flex: 2; }
+.sidebar .panel:last-child { flex: 1; }
 
-.sidebar .panel:first-child {
-  flex: 2;
-}
-.sidebar .panel:last-child {
-  flex: 1;
-}
-
-/* Workspace: fills remaining width */
+/* Workspace */
 .workspace {
   flex: 1;
   display: flex;
@@ -187,13 +166,10 @@ body {
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* contain children */
+  overflow: hidden;
 }
+.panel h2 { margin: 0 0 var(--space-2); font-size: 1rem; }
 
-.panel h2 {
-  margin: 0 0 var(--space-2);
-  font-size: 1rem;
-}
 /* =============================
    🌳 Tree list (hierarchical)
    ============================= */
@@ -201,19 +177,11 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  overflow-y: auto;       /* scroll if content too tall */
+  overflow-y: auto;
   max-height: 100%;
 }
-
-.tree-item {
-  margin-bottom: var(--space-2);
-}
-
-.tree-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
+.tree-item { margin-bottom: var(--space-2); }
+.tree-row { display: flex; align-items: center; gap: var(--space-2); }
 
 .tree-label {
   background: none;
@@ -225,22 +193,14 @@ body {
   border-radius: var(--radius);
   transition: background var(--fast);
   flex: 1;
-  white-space: nowrap;       /* prevent overflow */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;   /* truncate with … */
+  text-overflow: ellipsis;
 }
+.tree-label:hover { background: #eceff4; }
+.tree-label.active { background: var(--accent); color: var(--accent-contrast); }
 
-.tree-label:hover {
-  background: #eceff4;
-}
-
-.tree-label.active {
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-
-.tree-eye,
-.tree-toggle {
+.tree-eye, .tree-toggle {
   background: none;
   border: none;
   cursor: pointer;
@@ -250,11 +210,7 @@ body {
   color: var(--muted);
   flex-shrink: 0;
 }
-
-.tree-eye:hover,
-.tree-toggle:hover {
-  color: var(--accent);
-}
+.tree-eye:hover, .tree-toggle:hover { color: var(--accent); }
 
 .tree-sublist {
   list-style: none;
@@ -262,10 +218,7 @@ body {
   padding-left: var(--space-2);
   border-left: 1px dashed #ccc;
 }
-
-.tree-sublist.collapsed {
-  display: none;
-}
+.tree-sublist.collapsed { display: none; }
 
 /* =============================
    🖼️ SVG Preview constraints
@@ -275,7 +228,6 @@ body {
   gap: var(--space-4);
   min-height: var(--preview-row-min-h);
 }
-
 .preview-row .panel {
   flex: 1;
   min-width: 0;
@@ -283,38 +235,33 @@ body {
   flex-direction: column;
 }
 
-.svg-frame,
-.live-frame {
+/* Frames */
+.svg-frame, .live-frame {
   flex: 1;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   background: #fff;
   padding: var(--space-3);
-  overflow: auto; /* scroll instead of stretch */
+  overflow: auto;
 }
 
-.svg-frame {
-  flex: 1;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  background: #fff;
-  padding: var(--space-3);
-  overflow: auto; /* scroll instead of stretch */
-}
-
+/* Ensure injected SVG fits its frame and does not stretch the page */
 .svg-frame svg {
   display: block;
   max-width: 100%;
   max-height: 100%;
-  width: 100%;   /* force fit */
-  height: auto;  /* keep aspect ratio */
+  width: auto;
+  height: auto;
 }
 
+/* Active group styling */
 svg [data-group-id].active,
 svg .active {
   outline: 2px dashed var(--accent);
   filter: drop-shadow(0 0 6px rgba(0, 120, 215, 0.6));
-}/* =============================
+}
+
+/* =============================
    🔧 Options & Code row
    ============================= */
 .options-row {
@@ -322,15 +269,8 @@ svg .active {
   gap: var(--space-4);
   min-height: var(--options-row-min-h);
 }
+.options-row .panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-.options-row .panel {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Options panel content fills height */
 .options-panel {
   flex: 1;
   border: 1px solid #e2e6ea;
@@ -348,7 +288,6 @@ svg .active {
   gap: var(--space-2);
   margin: var(--space-3) 0;
 }
-
 .tab {
   padding: var(--space-2) var(--space-3);
   background: #eef5ff;
@@ -359,12 +298,8 @@ svg .active {
   font-size: 0.85rem;
   font-weight: 500;
 }
+.tab:hover { background: #e0edff; }
 
-.tab:hover {
-  background: #e0edff;
-}
-
-/* Code output fills panel height */
 .code-output {
   flex: 1;
   background: #fff;
@@ -377,51 +312,33 @@ svg .active {
   min-height: 160px;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 /* =============================
    👀 Debug overlay
    ============================= */
-.debug-overlay * {
-  outline: 1px dashed rgba(255, 0, 0, 0.4);
-}
+.debug-overlay * { outline: 1px dashed rgba(255, 0, 0, 0.4); }
 
 /* =============================
    📱 Responsive tweaks
    ============================= */
 @media (max-width: 900px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .preview-row {
-    min-height: 360px;
-  }
-
-  .options-row {
-    min-height: auto;
-  }
-
-  .sidebar {
-    width: auto;
-  }
-
-  .code-tabs {
-    justify-content: center;
-  }
+  .row { flex-direction: column; }
+  .preview-row { min-height: 360px; }
+  .options-row { min-height: auto; }
+  .sidebar { width: auto; }
+  .code-tabs { justify-content: center; }
 }
-/* Debug: force neutral backdrop and show everything */
-#svgPreview { background:#fff !important; overflow: visible !important; padding:12px !important; }
-#svgPreview svg { opacity:1 !important; filter:none !important; mix-blend-mode:normal !important; transform:none !important; display:block !important; max-width:100% !important; max-height:100% !important; }
-#svgPreview svg * { outline:1px dashed rgba(200,20,20,0.18) !important; }
-}
-/* Preview container sizing */
+
+/* =============================
+   Preview container sizing (explicit small preview)
+   Use these only for isolated preview panels; if your layout
+   uses .svg-frame/.live-frame prefer the frame rules above.
+   ============================= */
 #svgPreview, #livePreview {
   box-sizing: border-box;
-  width: 420px;        /* desired preview width (adjust) */
-  height: 360px;       /* desired preview height (adjust) */
+  width: 420px;
+  height: 360px;
   max-width: 100%;
   overflow: auto;
   border: 1px solid #ddd;
