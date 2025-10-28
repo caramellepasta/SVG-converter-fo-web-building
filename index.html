@@ -1,60 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🖌️ Inkscape SVG to HTML Mapper</title>
   <link rel="stylesheet" href="css.css" />
+  <style>
+    /* Tiny utility so the input is clearly actionable if you use the label pattern */
+    .file-upload { display: inline-flex; align-items: center; gap: .5rem; }
+    .file-upload input[type="file"]{ display: inline-block; }
+    .btn { cursor: pointer; }
+    .svg-frame { min-height: 220px; border: 1px solid #e6e6e6; background: #fff; padding: 12px; box-sizing: border-box; }
+    .code-output { white-space: pre-wrap; font-family: monospace; padding: 8px; border-top: 1px solid #eee; max-height: 240px; overflow:auto; }
+  </style>
 </head>
 <body class="theme-light">
 
-  <!-- =============================
-       🏷️ Header
-       ============================= -->
+  <!-- Header -->
   <header class="app-header">
     <h1 class="app-title">Inkscape SVG to HTML page (CSS Update - JS is broken)</h1>
     <p class="app-tagline">Hate coding? Me 2! So I made this!</p>
-    <p class="app-note">
-      ⚠️ *If you use custom fonts, only those from the Google Font store will work.* ⚠️
-    </p>
+    <p class="app-note">⚠️ If you use custom fonts, only those from the Google Font store will work.</p>
   </header>
 
-  <!-- =============================
-       🎛️ Top bar: Mode + Upload + Zoom
-       ============================= -->
+  <!-- Top bar -->
   <div class="top-bar">
-    <!-- 🌗 Mode selector -->
     <label for="modeSelect">🌗 Mode:</label>
     <select id="modeSelect">
       <option value="light" selected>☀️ Light</option>
       <option value="dark">🌙 Dark</option>
     </select>
 
-    <!-- 📂 Upload SVG file -->
-    <div class="file-upload">
+    <div class="file-upload" title="Upload an .svg file">
       <label for="svgFile" class="btn btn-outline">📂 Upload SVG</label>
-      <input type="file" id="svgFile" accept=".svg" />
+      <!-- Make input visible and accessible so JS can attach reliably -->
+      <input id="svgFile" type="file" accept=".svg,image/svg+xml" aria-label="Upload SVG file" />
     </div>
 
-    <!-- 🔍 Zoom to Fit -->
     <button id="zoomToFit" class="btn">🔍 Zoom to Fit</button>
   </div>
 
-  <!-- =============================
-       🧩 Main Layout: Sidebar + Workspace
-       ============================= -->
+  <!-- Main layout -->
   <main class="mapper-layout">
     <div class="row">
 
-      <!-- 🌳 Sidebar -->
+      <!-- Sidebar -->
       <aside class="sidebar">
-        <!-- 🌳 SVG Groups Layers -->
         <div class="panel">
           <h2>🌳 SVG Groups Layers</h2>
           <ul id="layerTree" class="tree-list"></ul>
         </div>
 
-        <!-- ⚙️ Element Generators -->
         <div class="panel">
           <h2>⚙️ Element Generators</h2>
           <div class="element-buttons">
@@ -69,27 +65,21 @@
         </div>
       </aside>
 
-      <!-- 🖼️ Workspace -->
+      <!-- Workspace -->
       <section class="workspace">
-
-        <!-- 🖼️ + 🖥️ Preview Row -->
         <div class="row preview-row">
-          <!-- 🖼️ SVG Preview -->
           <div class="panel">
             <h2>🖼️ SVG Preview</h2>
-            <div id="svgPreview" class="svg-frame"></div>
+            <div id="svgPreview" class="svg-frame" aria-live="polite"></div>
           </div>
 
-          <!-- 🖥️ Live HTML Preview -->
           <div class="panel">
             <h2>🖥️ Live HTML Preview</h2>
-            <div class="live-frame" id="livePreview"></div>
+            <div id="livePreview" class="live-frame"></div>
           </div>
         </div>
 
-        <!-- 🔧 + 🧾 Options & Codes Row -->
         <div class="row options-row">
-          <!-- 🔧 Element Options -->
           <div class="panel">
             <h2>🔧 Element Options</h2>
             <div id="elementOptions" class="options-panel">
@@ -97,7 +87,6 @@
             </div>
           </div>
 
-          <!-- 🧾 Generated Codes -->
           <div class="panel">
             <h2>🧾 Generated Codes</h2>
             <div class="code-tabs">
@@ -107,20 +96,17 @@
               <button class="tab" data-target="reorganize">Re-organise</button>
               <button class="tab" data-target="clear">Clear</button>
             </div>
-            <div class="code-output" id="code-html"></div>
-            <div class="code-output hidden" id="code-css"></div>
-            <div class="code-output hidden" id="code-js"></div>
+            <div id="code-html" class="code-output"></div>
+            <div id="code-css" class="code-output" style="display:none"></div>
+            <div id="code-js" class="code-output" style="display:none"></div>
           </div>
         </div>
-
       </section>
+
     </div>
   </main>
 
-  <!-- =============================
-       📜 JavaScript
-       ============================= -->
-  <script src="scripts.js"></script>
-
+  <!-- Scripts -->
+  <script src="scripts.js" defer></script>
 </body>
 </html>
