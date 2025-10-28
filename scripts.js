@@ -1,5 +1,5 @@
 /* =============================
-   📜 Inkscape SVG to HTML Mapper — Part 1
+   1📜 Inkscape SVG to HTML Mapper — Part 1
    Core setup, refs, feature flags, theme
    ============================= */
    document.addEventListener("DOMContentLoaded", () => { /* paste full script here */ });
