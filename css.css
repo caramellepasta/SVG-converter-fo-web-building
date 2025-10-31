@@ -439,3 +439,34 @@ svg .active {
   transform-origin: 50% 50%;
   will-change: transform;
 }
+/* Patch: stack live preview and generated code inside the same panel */
+.panel > .live-frame {
+  min-height: 280px;
+  max-height: 48vh;
+  overflow: auto;
+  border: 1px solid #eee;
+  background: #fff;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* Generated codes sit under the rendering and have their own scroll */
+.panel .generated-panel {
+  margin-top: 8px;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+.panel .generated-panel .code-output {
+  max-height: 220px;
+  overflow: auto;
+  background: #fafafa;
+  border: 1px solid #eee;
+  padding: 8px;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+/* Keep layout from stretching when ancestors use flex */
+.mapper-layout .row { min-width: 0; }
