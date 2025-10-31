@@ -1,4 +1,4 @@
-/* scripts.v2.js — rebuilt, complete, stable preview, improved zoomToFit, selection + clamps + interaction fixes 2 */
+/* scripts.v2.js — rebuilt, complete, stable preview, improved zoomToFit, selection + clamps + interaction fixes */
 (function(){
   "use strict";
 
