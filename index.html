@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🖌️ Inkscape SVG to HTML Mapper</title>
   <link rel="stylesheet" href="css.css" />
-  <style>
-    /* Tiny utility so the input is clearly actionable if you use the label pattern */
-    .file-upload { display: inline-flex; align-items: center; gap: .5rem; }
-    .file-upload input[type="file"]{ display: inline-block; }
-    .btn { cursor: pointer; }
-    .svg-frame { min-height: 220px; border: 1px solid #e6e6e6; background: #fff; padding: 12px; box-sizing: border-box; }
-    .code-output { white-space: pre-wrap; font-family: monospace; padding: 8px; border-top: 1px solid #eee; max-height: 240px; overflow:auto; }
-  </style>
 </head>
 <body class="theme-light">
 
@@ -33,12 +25,8 @@
 
     <div class="file-upload" title="Upload an .svg file">
       <label for="svgFile" class="btn btn-outline">📂 Upload SVG</label>
-      <!-- Make input visible and accessible so JS can attach reliably -->
       <input id="svgFile" type="file" accept=".svg,image/svg+xml" aria-label="Upload SVG file" />
-    </div>
-
-    <button id="zoomToFit" class="btn">🔍 Zoom to Fit</button>
-  </div>
+    </div> </div>
 
   <!-- Main layout -->
   <main class="mapper-layout">
@@ -68,14 +56,46 @@
       <!-- Workspace -->
       <section class="workspace">
         <div class="row preview-row">
+
           <div class="panel">
             <h2>🖼️ SVG Preview</h2>
             <div id="svgPreview" class="svg-frame" aria-live="polite"></div>
           </div>
 
-          <div class="panel">
-            <h2>🖥️ Live HTML Preview</h2>
-            <div id="livePreview" class="live-frame"></div>
+          <!-- Right column: Live preview + tabs moved into header -->
+          <div class="panel" id="rightPanel">
+            <div class="panel-header-row">
+              <h2 style="margin:0">🖥️ Live HTML Preview</h2>
+
+              <!-- Tabs moved into the Live Preview header. Keep IDs unchanged so JS can target #code-html / #code-css / #code-js -->
+              <div class="panel-controls" role="tablist" aria-label="Preview controls">
+                <button class="gc-btn active" data-target="live" aria-controls="view-live">Live</button>
+                <button class="gc-btn" data-target="html" aria-controls="view-html">HTML</button>
+                <button class="gc-btn" data-target="css" aria-controls="view-css">CSS</button>
+                <button class="gc-btn" data-target="js" aria-controls="view-js">JS</button>
+                <button class="gc-btn" data-target="reorganize">Re-organise</button>
+                <button class="gc-btn" data-target="clear">Reset</button>
+              </div>
+            </div>
+
+            <!-- Views container (IDs preserved for existing script compatibility) -->
+            <div id="panelViews">
+              <div id="view-live" class="view view-live active" aria-hidden="false">
+                <div id="livePreview" class="live-frame" aria-live="polite" role="region"></div>
+              </div>
+
+              <div id="view-html" class="view view-code" aria-hidden="true">
+                <div id="code-html" class="code-output" aria-hidden="true"></div>
+              </div>
+
+              <div id="view-css" class="view view-code" aria-hidden="true">
+                <div id="code-css" class="code-output" aria-hidden="true"></div>
+              </div>
+
+              <div id="view-js" class="view view-code" aria-hidden="true">
+                <div id="code-js" class="code-output" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -87,18 +107,10 @@
             </div>
           </div>
 
-          <div class="panel">
+          <!-- Generated Codes removed; controls moved into Live Preview header as requested -->
+          <div class="panel" aria-hidden="true" style="display:none">
             <h2>🧾 Generated Codes</h2>
-            <div class="code-tabs">
-              <button class="tab" data-target="html">HTML</button>
-              <button class="tab" data-target="css">CSS</button>
-              <button class="tab" data-target="js">JS</button>
-              <button class="tab" data-target="reorganize">Re-organise</button>
-              <button class="tab" data-target="clear">Clear</button>
-            </div>
-            <div id="code-html" class="code-output"></div>
-            <div id="code-css" class="code-output" style="display:none"></div>
-            <div id="code-js" class="code-output" style="display:none"></div>
+            <div class="muted">Removed — controls moved into Live Preview header.</div>
           </div>
         </div>
       </section>
@@ -106,7 +118,9 @@
     </div>
   </main>
 
-  <!-- Scripts -->
+  <!-- scripts.v2.js is still used for your main logic.
+       Add the preview-tab controller into scripts.v2.js later and call its initializer during app init.
+       No inline controller here so you can approve HTML first. -->
   <script src="scripts.v2.js" defer></script>
 </body>
 </html>
