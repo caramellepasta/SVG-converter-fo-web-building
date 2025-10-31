@@ -1,4 +1,7 @@
-/* scripts.v2.js — rebuilt, complete, stable preview, improved zoomToFit, selection + clamps + interaction fixes */
+/* scripts.v2.js — touch zoom, pointer selection, auto-align, no UI-hiding heuristics
+   Updated: ensure raw SVG/XML goes to HTML output, Live view renders visual preview,
+   initPreviewHeaderController wired into attachUiHelpers, Clear creates scaffold
+*/
 (function(){
   "use strict";
 
@@ -20,16 +23,16 @@
     Object.keys(IDS).forEach(k => refs[k] = document.getElementById(IDS[k]));
   }
 
-  // --- global clamp to prevent ancestor-driven mega-widths ---
+  // --- ensure minimal global CSS clamp if missing (non-forcing, transparent background) ---
   (function ensureSvgMapperClamp(){
     if(document.getElementById('svgMapperGlobalClamp')) return;
     try{
       const css = `
-        /* svg-mapper safety clamp (idempotent) */
-        #svgPreview, #svgPreview .svg-wrapper { box-sizing: border-box !important; max-width: 100% !important; width: 720px !important; height: 520px !important; }
-        html, body, #root, .app, .container { box-sizing: border-box !important; max-width: 1600px !important; }
-        #svgPreview .svg-wrapper { background: transparent !important; overflow: auto !important; touch-action: manipulation !important; }
-        #svgPreview svg * { cursor: pointer !important; pointer-events: auto !important; }
+        /* svg-mapper safety clamp */
+        #svgPreview { box-sizing: border-box !important; width: auto !important; max-width: 100% !important; background: transparent !important; }
+        #svgPreview .svg-wrapper { box-sizing: border-box !important; width: 100% !important; max-width: 100% !important; max-height: 80vh !important; height: auto !important; overflow: auto !important; background: transparent !important; touch-action: manipulation !important; -webkit-user-select: none !important; -webkit-touch-callout: none !important; }
+        html, body, #root, .app, .container { box-sizing: border-box !important; max-width: 2000px !important; }
+        #svgPreview svg { display:block !important; max-width: 100% !important; height: auto !important; pointer-events: auto !important; }
       `.trim();
       const st = document.createElement('style');
       st.id = 'svgMapperGlobalClamp';
@@ -82,6 +85,24 @@
     return clone;
   }
 
+  function autoHideOversized(svgEl){
+    if(!svgEl) return;
+    try{
+      Array.from(svgEl.querySelectorAll('*')).forEach(n=>{
+        try{
+          const b = n.getBBox();
+          if(!isFinite(b.width) || !isFinite(b.height)) return;
+          // conservative thresholds: hide far-off or massive elements that break layout
+          if (b.width > 2000 || b.height > 2000 || Math.abs(b.x) > 10000 || Math.abs(b.y) > 10000) {
+            n.dataset.__hidden_by_mapper = '1';
+            n.dataset.__hidden_prev_display = n.style.display || '';
+            n.style.display = 'none';
+          }
+        }catch(e){}
+      });
+    }catch(e){}
+  }
+
   function injectSvgIntoPreview(svgOrString){
     refreshRefs();
     const preview = refs.svgPreview;
@@ -109,35 +130,25 @@
     wrapper.innerHTML = "";
     wrapper.appendChild(normalized);
 
-    // layout safety on preview + wrapper
+    // layout safety on preview + wrapper (conservative, responsive defaults)
     try {
       preview.style.position = preview.style.position || 'relative';
-      preview.style.background = preview.style.background || '#f3e0c8';
+      preview.style.background = preview.style.background || 'transparent';
       preview.style.boxSizing = 'border-box';
       wrapper.style.position = wrapper.style.position || 'relative';
       wrapper.style.background = 'transparent';
       wrapper.style.overflow = wrapper.style.overflow || 'auto';
-      wrapper.style.width = wrapper.style.width || '720px';
-      wrapper.style.height = wrapper.style.height || '520px';
-      wrapper.style.maxWidth = '100%';
+      wrapper.style.width = wrapper.style.width || '100%';
+      wrapper.style.height = wrapper.style.height || 'auto';
+      wrapper.style.maxWidth = wrapper.style.maxWidth || '100%';
+      wrapper.style.maxHeight = wrapper.style.maxHeight || '80vh';
       wrapper.tabIndex = wrapper.tabIndex || -1;
       wrapper.style.padding = wrapper.style.padding || '8px';
     } catch(e){}
-	// post-insert: reset any forced sizing and reset scroll/focus so preview isn't clipped
-	try {
-	  // prefer responsive sizing, not fixed px
-	  preview.style.width = preview.style.width || '';
-	  preview.style.height = preview.style.height || '';
-	  wrapper.style.width = '100%';
-	  wrapper.style.maxWidth = '100%';
-	  wrapper.style.maxHeight = wrapper.style.maxHeight || '80vh';
-	  wrapper.style.overflow = wrapper.style.overflow || 'auto';
 
-	  // reset scroll so top of artwork is visible and focus for keyboard (Escape)
-	  wrapper.scrollTop = 0;
-	  wrapper.scrollLeft = 0;
-	  wrapper.focus && wrapper.focus();
-	} catch(e){}
+    // auto-clean obvious oversized children before sizing
+    autoHideOversized(normalized);
+
     // ensure SVG sizing cooperates with wrapper
     normalized.style.display = "block";
     normalized.style.maxWidth = "100%";
@@ -160,29 +171,6 @@
       });
     } catch(e){}
 
-    // normalize images/foreignObject sizes
-    try {
-      Array.from(normalized.querySelectorAll('image, foreignObject')).forEach(el=>{
-        el.removeAttribute('width'); el.removeAttribute('height');
-        if (el.style && el.style.width && el.style.width.includes('px')) el.style.width = '';
-        if (el.style && el.style.height && el.style.height.includes('px')) el.style.height = '';
-        el.style.maxWidth = '100%'; el.style.maxHeight = '100%';
-      });
-    } catch(e){}
-
-    // hide very large rects likely used as page backgrounds (mark for restore)
-    try {
-      Array.from(normalized.querySelectorAll('rect')).forEach(r => {
-        const rw = parseFloatSafe(r.getAttribute('width')||0);
-        const rh = parseFloatSafe(r.getAttribute('height')||0);
-        if ((rw > 100 && rh > 100 && (rw / Math.max(rh,1)) > 0.05) || rw > 1000 || rh > 1000) {
-          r.dataset.__hidden_by_mapper = '1';
-          r.dataset.__hidden_prev_display = r.style.display || '';
-          r.style.display = 'none';
-        }
-      });
-    } catch(e){}
-
     // hide embedded images that affect layout and mark for restore
     try {
       Array.from(normalized.querySelectorAll('image')).forEach(img => {
@@ -190,6 +178,13 @@
         img.dataset.__hidden_prev_display = img.style.display || '';
         img.style.display = 'none';
       });
+    } catch(e){}
+
+    // reset scroll so top of artwork is visible and focus for keyboard (Escape)
+    try {
+      wrapper.scrollTop = 0;
+      wrapper.scrollLeft = 0;
+      wrapper.focus && wrapper.focus();
     } catch(e){}
 
     return true;
@@ -225,10 +220,15 @@
       reader.onload = function(e){
         const txt = e.target.result || "";
 
+        // route raw XML into code-html and clear livePreview text echo
         const maxPreview = 200000;
         refreshRefs();
+        if (refs && refs.codeHtml) {
+          refs.codeHtml.textContent = txt.length > maxPreview ? txt.slice(0, maxPreview) + "\n\n...TRUNCATED..." : txt;
+        }
         if (refs && refs.livePreview) {
-          refs.livePreview.textContent = txt.length > maxPreview ? txt.slice(0, maxPreview) + "\n\n...TRUNCATED..." : txt;
+          // keep livePreview for visual render only
+          refs.livePreview.textContent = "";
         }
 
         const doc = new DOMParser().parseFromString(txt, "image/svg+xml");
@@ -256,17 +256,21 @@
         // stabilization and normalization (keeps preview stable)
         try {
           preview.style.position = preview.style.position || 'relative';
-          preview.style.background = preview.style.background || '#f3e0c8';
+          preview.style.background = preview.style.background || 'transparent';
           preview.style.boxSizing = 'border-box';
           wrapper.style.position = wrapper.style.position || 'relative';
           wrapper.style.background = 'transparent';
           wrapper.style.overflow = wrapper.style.overflow || 'auto';
-          wrapper.style.width = wrapper.style.width || '720px';
-          wrapper.style.height = wrapper.style.height || '520px';
-          wrapper.style.maxWidth = '100%';
+          wrapper.style.width = wrapper.style.width || '100%';
+          wrapper.style.height = wrapper.style.height || 'auto';
+          wrapper.style.maxWidth = wrapper.style.maxWidth || '100%';
+          wrapper.style.maxHeight = wrapper.style.maxHeight || '80vh';
           wrapper.tabIndex = wrapper.tabIndex || -1;
           wrapper.style.padding = wrapper.style.padding || '8px';
         } catch (ex) { /* ignore */ }
+
+        // conservative auto-clean of oversized children
+        autoHideOversized(svgClone);
 
         // ensure svg sizing and interactivity
         try {
@@ -287,36 +291,35 @@
           });
         } catch(e){}
 
-        // normalize images/foreignObject and hide big rects/images
+        // also populate the livePreview region with a rendered DOM snapshot of the page
+        // (so "Live" tab can show a small sample HTML rendering container if your wiring expects it)
         try {
-          Array.from(svgClone.querySelectorAll('image, foreignObject')).forEach(el=>{
-            el.removeAttribute('width'); el.removeAttribute('height');
-            if (el.style && el.style.width && el.style.width.includes('px')) el.style.width = '';
-            if (el.style && el.style.height && el.style.height.includes('px')) el.style.height = '';
-            el.style.maxWidth = '100%'; el.style.maxHeight = '100%';
-          });
-          Array.from(svgClone.querySelectorAll('rect')).forEach(r => {
-            const rw = parseFloatSafe(r.getAttribute('width')||0);
-            const rh = parseFloatSafe(r.getAttribute('height')||0);
-            if ((rw > 100 && rh > 100 && (rw / Math.max(rh,1)) > 0.05) || rw > 1000 || rh > 1000) {
-              r.dataset.__hidden_by_mapper = '1';
-              r.dataset.__hidden_prev_display = r.style.display || '';
-              r.style.display = 'none';
-            }
-          });
-          Array.from(svgClone.querySelectorAll('image')).forEach(img => {
-            img.dataset.__hidden_by_mapper_img = '1';
-            img.dataset.__hidden_prev_display = img.style.display || '';
-            img.style.display = 'none';
-          });
+          refreshRefs();
+          if(refs && refs.livePreview){
+            // clear previous HTML snapshot
+            refs.livePreview.innerHTML = "";
+            // create a lightweight container and clone the SVG into it for visual "live" experience
+            const snap = document.createElement('div');
+            snap.className = 'live-snapshot';
+            // clone the normalized SVG for the livePreview area
+            const snapshotSvg = svgClone.cloneNode(true);
+            // ensure sizing inside livePreview
+            snapshotSvg.style.display = 'block';
+            snapshotSvg.style.maxWidth = '100%';
+            snapshotSvg.style.height = 'auto';
+            snapshotSvg.removeAttribute('width');
+            snapshotSvg.removeAttribute('height');
+            snap.appendChild(snapshotSvg);
+            refs.livePreview.appendChild(snap);
+          }
         } catch(e){}
 
         if (typeof buildLayerTree === "function") {
           try { buildLayerTree(svgClone); } catch(e) {}
         }
 
-        // ensure click selection is available immediately
-        try { installPreviewClickDelegation(); } catch(e){}
+        // ensure pointer-based selection and zoom controls
+        try { installPreviewClickDelegation(); installZoomControls(); } catch(e){}
 
         // run improved zoom if present
         if(window.__svgMapper && typeof window.__svgMapper.zoomToFitImproved === 'function'){
@@ -332,7 +335,7 @@
     return true;
   }
 
-  // click/delegation installer (idempotent)
+  // click/delegation installer (idempotent) — switched to pointer-based selection (tap friendly)
   function installPreviewClickDelegation(){
     refreshRefs();
     const previewEl = document.getElementById('svgPreview');
@@ -342,6 +345,13 @@
     if(wrapperEl._svgClickHandlerInstalled) return;
     wrapperEl._svgClickHandlerInstalled = true;
 
+    // small focus/tabIndex safety so Escape and focus-based scroll behave
+    try {
+      wrapperEl.tabIndex = wrapperEl.tabIndex || -1;
+      wrapperEl.style.outline = wrapperEl.style.outline || 'none';
+      wrapperEl.focus && wrapperEl.focus();
+    } catch(e){}
+
     // Clear selection helper
     function clearSelection(){
       const s = wrapperEl.querySelector('svg');
@@ -350,8 +360,10 @@
       if(lt) lt.querySelectorAll('.active').forEach(n=>n.classList.remove('active'));
     }
 
-    // Delegate clicks: select nearest SVG group/element, or deselect on background
-    wrapperEl.addEventListener('click', function(ev){
+    // Delegate pointerup/tap: select nearest SVG group/element, or deselect on background
+    wrapperEl.addEventListener('pointerup', function(ev){
+      // ignore secondary pointers
+      if(ev.button && ev.button !== 0) return;
       const s = wrapperEl.querySelector('svg');
       if(!s) return;
       let el = ev.target;
@@ -368,10 +380,8 @@
       const lt = document.getElementById('layerTree');
       if(lt){
         lt.querySelectorAll('.active').forEach(n=>n.classList.remove('active'));
-        // match by id (labelBtn.title stores id), fallback to text match
         let btn = lt.querySelector(`.tree-label[title="${el.id}"]`);
         if(!btn){
-          // try to find by matching label text to element's inkscape:label / data-name
           btn = Array.from(lt.querySelectorAll('.tree-label')).find(b => b.textContent && el.getAttribute && b.textContent.trim() === (el.getAttribute('inkscape:label')||el.getAttribute('data-name')||el.id||''));
         }
         if(btn) btn.classList.add('active');
@@ -380,8 +390,106 @@
 
     // keyboard: Escape clears selection
     wrapperEl.addEventListener('keydown', function(ev){
-      if(ev.key === 'Escape') clearSelection();
+      if(ev.key === 'Escape') {
+        wrapperEl.querySelectorAll('.active').forEach(a=>a.classList.remove('active'));
+      }
     }, false);
+  }
+
+  // zoom controls installer (idempotent)
+  function installZoomControls(){
+    refreshRefs();
+    const preview = refs.svgPreview || document.getElementById('svgPreview');
+    if(!preview) return;
+    if(preview._zoomControlsInstalled) return;
+    preview._zoomControlsInstalled = true;
+
+    let wrapper = preview.querySelector('.svg-wrapper');
+    if(!wrapper){
+      wrapper = document.createElement('div'); wrapper.className='svg-wrapper';
+      preview.appendChild(wrapper);
+    }
+
+    // create controls container
+    const ctrl = document.createElement('div');
+    ctrl.className = 'svg-zoom-controls';
+    ctrl.style.position = 'absolute';
+    ctrl.style.right = '8px';
+    ctrl.style.bottom = '8px';
+    ctrl.style.zIndex = 9999;
+    ctrl.style.display = 'flex';
+    ctrl.style.flexDirection = 'column';
+    ctrl.style.gap = '6px';
+    ctrl.innerHTML = '<button type="button" class="zoom-in" aria-label="Zoom in">+</button><button type="button" class="zoom-fit" aria-label="Zoom fit">□</button><button type="button" class="zoom-out" aria-label="Zoom out">−</button>';
+    preview.appendChild(ctrl);
+
+    const styleBtn = fn => {
+      try {
+        fn.style.width='40px'; fn.style.height='40px'; fn.style.borderRadius='6px'; fn.style.border='1px solid rgba(0,0,0,0.12)'; fn.style.background='rgba(255,255,255,0.95)'; fn.style.fontSize='18px';
+      } catch(e){}
+    };
+    Array.from(ctrl.querySelectorAll('button')).forEach(b => styleBtn(b));
+
+    let scale = 1;
+    let panX = 0, panY = 0;
+
+    function svgRoot(){ return preview.querySelector('svg'); }
+    function applyTransform(){
+      const s = svgRoot();
+      if(!s) return;
+      s.style.transformOrigin = '0 0';
+      s.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    ctrl.querySelector('.zoom-in').addEventListener('click', ()=>{ scale = Math.min(6, +(scale * 1.2).toFixed(4)); applyTransform(); });
+    ctrl.querySelector('.zoom-out').addEventListener('click', ()=>{ scale = Math.max(0.25, +(scale / 1.2).toFixed(4)); applyTransform(); });
+    ctrl.querySelector('.zoom-fit').addEventListener('click', ()=>{ scale = 1; panX = 0; panY = 0; try{ if(window.__svgMapper && typeof window.__svgMapper.zoomToFitImproved === 'function') window.__svgMapper.zoomToFitImproved(); }catch(e){} applyTransform(); });
+
+    // Pointer-based pinch handling (works on iPad with Pointer Events)
+    let pointers = new Map();
+    preview.addEventListener('pointerdown', ev => {
+      try{ preview.setPointerCapture && preview.setPointerCapture(ev.pointerId); }catch(e){}
+      pointers.set(ev.pointerId, ev);
+    }, {passive:true});
+    preview.addEventListener('pointermove', ev => {
+      if(!pointers.size) return;
+      if(pointers.size === 2){
+        pointers.set(ev.pointerId, ev);
+        const pts = Array.from(pointers.values());
+        const d = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+        if(preview._lastPinchDist){
+          const delta = d / preview._lastPinchDist;
+          scale = Math.max(0.25, Math.min(6, scale * delta));
+          applyTransform();
+        }
+        preview._lastPinchDist = d;
+      } else if(pointers.size === 1 && ev.isPrimary){
+        // pan when zoomed
+        if(scale !== 1){
+          const last = pointers.get(ev.pointerId);
+          if(last){
+            panX += ev.clientX - last.clientX;
+            panY += ev.clientY - last.clientY;
+            applyTransform();
+          }
+          pointers.set(ev.pointerId, ev);
+        }
+      }
+    }, {passive:true});
+    preview.addEventListener('pointerup', ev => { pointers.delete(ev.pointerId); preview._lastPinchDist = null; try{ preview.releasePointerCapture && preview.releasePointerCapture(ev.pointerId); }catch(e){} }, {passive:true});
+    preview.addEventListener('pointercancel', ev => { pointers.delete(ev.pointerId); preview._lastPinchDist = null; }, {passive:true});
+
+    // double-tap to toggle zoom
+    let lastTap = 0;
+    preview.addEventListener('touchend', ev => {
+      const t = Date.now();
+      if(t - lastTap < 300){
+        scale = (Math.abs(scale - 1) < 0.01) ? 2 : 1;
+        panX = 0; panY = 0;
+        applyTransform();
+      }
+      lastTap = t;
+    }, {passive:true});
   }
 
   function waitAndInstall(timeoutMs){
@@ -414,6 +522,8 @@
       }catch(e){}
     }
     s.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    // reset transform-based zoom
+    s.style.transform = '';
   }
 
   function zoomToFitImproved() {
@@ -461,8 +571,89 @@
 
     try { wrap.setAttribute('transform', ''); wrap.style.transform = ''; } catch (e) {}
 
+    // reset transform-based zoom when fitting
+    svg.style.transform = '';
     return true;
   }
+
+  // --- Begin: Preview header tab controller (keeps IDs intact) ---
+  function initPreviewHeaderController(rootSelector = '#rightPanel') {
+    const viewMap = { live: 'view-live', html: 'view-html', css: 'view-css', js: 'view-js' };
+    const root = document.querySelector(rootSelector);
+    if (!root) return;
+
+    const buttons = Array.from(root.querySelectorAll('.gc-btn'));
+    if (!buttons.length) return;
+
+    function showView(name) {
+      Object.keys(viewMap).forEach(k => {
+        const id = viewMap[k];
+        const el = document.getElementById(id);
+        if (!el) return;
+        const active = k === name;
+        el.classList.toggle('active', active);
+        el.style.display = active ? '' : 'none';
+        el.setAttribute('aria-hidden', String(!active));
+      });
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.target === name));
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.target;
+        if (t === 'clear') {
+          // Reset code outputs with a basic HTML scaffold for new generation work
+          const htmlOut = document.getElementById('code-html');
+          const cssOut = document.getElementById('code-css');
+          const jsOut = document.getElementById('code-js');
+
+          if (htmlOut) {
+            htmlOut.textContent =
+`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generated from SVG</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- SVG content will be inserted here -->`;
+          }
+
+          if (cssOut) cssOut.textContent = "/* Generated CSS will appear here */";
+          if (jsOut) jsOut.textContent = "// Generated JS will appear here";
+
+          // Clear live preview rendering and deselect any active SVG selection
+          const live = document.getElementById('livePreview');
+          const svgPrev = document.getElementById('svgPreview');
+          if (live) live.innerHTML = "";
+          if (svgPrev) {
+            svgPrev.querySelectorAll('.active').forEach(a => a.classList.remove('active'));
+            const wrapper = svgPrev.querySelector('.svg-wrapper');
+            if (wrapper) {
+              wrapper.scrollTop = 0;
+              wrapper.scrollLeft = 0;
+              const s = wrapper.querySelector('svg');
+              if (s) s.style.transform = '';
+            }
+          }
+          return;
+        }
+        if (t === 'reorganize') {
+          document.dispatchEvent(new CustomEvent('generated:reorganize'));
+          return;
+        }
+        if (viewMap[t]) showView(t);
+      });
+    });
+
+    // ensure initial state (show live)
+    showView('live');
+
+    return { showView };
+  }
+  // --- End: Preview header tab controller ---
 
   // public API
   window.__svgMapper = window.__svgMapper || {};
@@ -563,40 +754,158 @@
   }
 
   function initTabsAndUi(){
-    refreshRefs();
-    const tabs = document.querySelectorAll(".tab");
-    const outputs = { html: refs.codeHtml, css: refs.codeCss, js: refs.codeJs };
-    if(!tabs || !tabs.length) return;
-    tabs.forEach(tab => tab.addEventListener("click", () => {
-      const target = tab.dataset.target;
-      Object.values(outputs).forEach(el => el && el.classList.add("hidden"));
-      if(target === "clear"){
-        Object.values(outputs).forEach(el => { if(el) el.textContent = ""; });
-        if(refs.livePreview) refs.livePreview.innerHTML = "";
-        if(refs.svgPreview) refs.svgPreview.querySelectorAll(".active").forEach(a => a.classList.remove("active"));
+  refreshRefs();
+
+  // explicit outputs by id (robust)
+  const outputs = {
+    html: document.getElementById(IDS.codeHtml),
+    css:  document.getElementById(IDS.codeCss),
+    js:   document.getElementById(IDS.codeJs),
+    liveViewContainer: document.getElementById('view-live') // optional
+  };
+
+  // helper to hide all code views and live view
+  function hideAllViews(){
+    Object.keys(outputs).forEach(k => {
+      const el = outputs[k];
+      if(!el) return;
+      // For view-live we keep the container visible state separate, but still hide it here
+      if(el === outputs.liveViewContainer){
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden','true');
       } else {
-        const panel = outputs[target];
-        if(panel) panel.classList.remove("hidden");
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden','true');
       }
-    }));
-    if(refs.debugToggle) refs.debugToggle.addEventListener("change", () => document.body.classList.toggle("debug-overlay", refs.debugToggle.checked));
-    if(refs.modeSelect) refs.modeSelect.addEventListener("change", () => {
-      document.body.classList.toggle("theme-dark", refs.modeSelect.value === "dark");
-      document.body.classList.toggle("theme-light", refs.modeSelect.value === "light");
     });
   }
+
+  // helper to show a single named view: 'live'|'html'|'css'|'js'
+  function showNamedView(name){
+    hideAllViews();
+    if(name === 'live'){
+      const v = document.getElementById('view-live');
+      if(v){
+        v.style.display = '';
+        v.setAttribute('aria-hidden','false');
+      }
+    } else if(name === 'html' || name === 'css' || name === 'js'){
+      const id = name === 'html' ? IDS.codeHtml : (name === 'css' ? IDS.codeCss : IDS.codeJs);
+      const el = document.getElementById(id);
+      if(el){
+        el.style.display = '';
+        el.setAttribute('aria-hidden','false');
+      }
+    }
+  }
+
+  // wire any legacy .tab buttons (bottom-right) to the same controller if present
+  const legacyTabs = document.querySelectorAll('.tab');
+  Array.from(legacyTabs).forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.target;
+      if(target === 'clear'){
+        // produce scaffold as in header controller clear
+        const htmlOut = document.getElementById(IDS.codeHtml);
+        const cssOut  = document.getElementById(IDS.codeCss);
+        const jsOut   = document.getElementById(IDS.codeJs);
+        if(htmlOut) htmlOut.textContent =
+`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generated from SVG</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- SVG content will be inserted here -->`;
+        if(cssOut) cssOut.textContent = "/* Generated CSS will appear here */";
+        if(jsOut) jsOut.textContent = "// Generated JS will appear here";
+        // clear live area snapshot, reset selection if any
+        if(refs && refs.livePreview) refs.livePreview.innerHTML = "";
+        if(refs && refs.svgPreview) refs.svgPreview.querySelectorAll('.active').forEach(a=>a.classList.remove('active'));
+        showNamedView('live');
+        return;
+      }
+      if(target === 'reorganize'){
+        document.dispatchEvent(new CustomEvent('generated:reorganize'));
+        return;
+      }
+      if(target === 'live' || target === 'html' || target === 'css' || target === 'js'){
+        showNamedView(target);
+      }
+    });
+  });
+
+  // wire header gc-btns (if present) — keep parity with legacy tabs
+  const headerBtns = document.querySelectorAll('#rightPanel .gc-btn');
+  Array.from(headerBtns).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.target;
+      if(t === 'clear'){
+        const htmlOut = document.getElementById(IDS.codeHtml);
+        const cssOut  = document.getElementById(IDS.codeCss);
+        const jsOut   = document.getElementById(IDS.codeJs);
+        if(htmlOut) htmlOut.textContent =
+`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generated from SVG</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- SVG content will be inserted here -->`;
+        if(cssOut) cssOut.textContent = "/* Generated CSS will appear here */";
+        if(jsOut) jsOut.textContent = "// Generated JS will appear here";
+        if(refs && refs.livePreview) refs.livePreview.innerHTML = "";
+        if(refs && refs.svgPreview) refs.svgPreview.querySelectorAll('.active').forEach(a=>a.classList.remove('active'));
+        showNamedView('live');
+        return;
+      }
+      if(t === 'reorganize'){
+        document.dispatchEvent(new CustomEvent('generated:reorganize'));
+        return;
+      }
+      if(t === 'live' || t === 'html' || t === 'css' || t === 'js'){
+        // update active button visuals (both header and legacy if needed)
+        Array.from(headerBtns).forEach(b => b.classList.toggle('active', b === btn));
+        Array.from(legacyTabs).forEach(tb => tb.classList.toggle('active', tb.dataset.target === t));
+        showNamedView(t);
+      }
+    });
+  });
+
+  // sync mode select and debug toggle if present
+  if(refs.debugToggle) refs.debugToggle.addEventListener("change", () => document.body.classList.toggle("debug-overlay", refs.debugToggle.checked));
+  if(refs.modeSelect) refs.modeSelect.addEventListener("change", () => {
+    document.body.classList.toggle("theme-dark", refs.modeSelect.value === "dark");
+    document.body.classList.toggle("theme-light", refs.modeSelect.value === "light");
+  });
+
+  // ensure initial state
+  showNamedView('live');
+}
+
 
   function attachUiHelpers(){
     refreshRefs();
     initTabsAndUi();
+
+    // wire preview header tabs (Live / HTML / CSS / JS)
+    try { initPreviewHeaderController('#rightPanel'); } catch (e) {}
+
     if(refs.zoomToFit){
       try{ refs.zoomToFit.removeEventListener("click", refs.zoomToFit._mapperZoom); }catch(e){}
       refs.zoomToFit._mapperZoom = function(){ zoomToFit(); };
       refs.zoomToFit.addEventListener("click", refs.zoomToFit._mapperZoom);
     }
 
-    // ensure click delegation is installed (idempotent)
+    // ensure click delegation is installed (pointer-based)
     try { installPreviewClickDelegation(); } catch(e){}
+    try { installZoomControls(); } catch(e){}
   }
 
   function autoInit(){
@@ -604,7 +913,7 @@
     attachUiHelpers();
     waitAndInstall().then(() => {
       refreshRefs();
-      try { installPreviewClickDelegation(); } catch(e){}
+      try { installPreviewClickDelegation(); installZoomControls(); } catch(e){}
     });
   }
 
